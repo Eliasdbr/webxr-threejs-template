@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { VRButton } from 'three/addons/webxr/VRButton.js';
-import PickHelper from "./core/PickHelper";
+// import PickHelper from "./core/PickHelper";
+import ControllerPickHelper from "./core/ControllerPickHelper";
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
@@ -22,11 +23,15 @@ document.body.appendChild( VRButton.createButton( renderer ) );
 // Enables xr
 renderer.xr.enabled = true;
 
-// VR Pointer
-const pickHelper = new PickHelper(mainCamera);
-
 // Main scene
 const mainScene = new THREE.Scene();
+
+// VR Pickable objects
+const pickRoot = new THREE.Object3D();
+mainScene.add(pickRoot);
+
+// VR Pointer
+const pickHelper = new ControllerPickHelper(renderer, mainScene);
 
 // Cube structure
 const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -73,7 +78,7 @@ const texture = loader.load(
 	});
 
 // Adds objects to the main scene
-mainScene.add(cube);
+pickRoot.add(cube);
 mainScene.add(plane);
 mainScene.add(sunlight);
 mainScene.add(sunlight.target);
@@ -88,7 +93,7 @@ renderer.setAnimationLoop( (time) => {
 	cube.rotation.x += 0.01;
 	cube.rotation.y += 0.01;
 
-	pickHelper.pick(new THREE.Vector2(0, 0), mainScene, mainCamera, seconds);
+	pickHelper.update(pickRoot, seconds);
 
 	renderer.render(mainScene, mainCamera);
 
