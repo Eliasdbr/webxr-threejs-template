@@ -61,7 +61,7 @@ const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 // Skybox
 const loader = new THREE.TextureLoader();
 const texture = loader.load(
-	'./assets/img/sky4.jpg',
+	'./public/assets/img/sky4.jpg',
 	() => {
 		texture.mapping = THREE.EquirectangularReflectionMapping;
 		texture.colorSpace = THREE.SRGBColorSpace;

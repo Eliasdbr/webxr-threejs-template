@@ -6,8 +6,9 @@ This is a Vite-powered Three.js project with WebXR capabilities.
 
 - [Objective](#objective)
 - [Motivation](#motivation)
-- [Installation](#installation)
-- [Run the project](#run-the-project)
+-	Getting started
+	- [Installation](#installation)
+	- [Run the project](#run-the-project)
 - [Deploy](#deploy)
 - [Contribution](#contribution)
 
@@ -47,8 +48,16 @@ You can launch it from your browser through the **localhost** url, or from anoth
 
 ## Deploy
 
-I haven't tested this part yet, so when I do it, I will update this section.
+To make a production build, you need to run the next command:
+```
+npm run build
+```
+This will generate a "dist" folder at the root of the project. This is the folder that will need to be uploaded to the production environment.
+
+You can use Github Pages, Itch.io or Netlify to test the deployed project.
 
 ## Contribution
 
-I also need to figure this out yet...
+Any suggestions are welcome.
+
+If you want to suggest a change, you can fork this project, and make a Pull Request.
