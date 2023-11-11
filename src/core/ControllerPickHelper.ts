@@ -1,13 +1,26 @@
 import * as THREE from "three";
 
-export default class ControllerPickHelper extends THREE.EventDispatcher {
+type selectEvent = {
+		data: XRInputSource;
+	} 
+	& THREE.Event<
+		"select" | "selectstart" | "selectend", 
+		THREE.XRTargetRaySpace
+	>;
+
+export default class ControllerPickHelper extends THREE.EventDispatcher<{ 
+	type: string; controller: THREE.XRTargetRaySpace; selectedObject: any; 
+}> {
+	// Class properties
 	raycaster: THREE.Raycaster;
 	objectToColorMap: Map<
 		THREE.Object3D<THREE.Object3DEventMap>,
 		THREE.Color
 	>;
 	controllerToObjectMap: Map<
-		THREE.XRTargetRaySpace, any>;
+		THREE.XRTargetRaySpace,
+		any
+	>;
 	controllers: {
 		controller: THREE.XRTargetRaySpace,
 		line: THREE.Line,
@@ -15,6 +28,7 @@ export default class ControllerPickHelper extends THREE.EventDispatcher {
 	pickedObject?: THREE.Object3D<THREE.Object3DEventMap> | null;
 	tempMatrix: THREE.Matrix4;
 
+	// Constructor
 	constructor(renderer: THREE.WebGLRenderer, scene: THREE.Scene) {
 		super();
 
@@ -27,21 +41,44 @@ export default class ControllerPickHelper extends THREE.EventDispatcher {
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, 0, -1),
     ]);
+		const pointerMaterial = new THREE.LineBasicMaterial({
+			color: 0xFFFFFF,
+		})
  
     this.controllers = [];
+
+		const selectListener = (event: selectEvent) => {
+      const controller = event.target;
+      const selectedObject = this.controllerToObjectMap.get(event.target);
+			const line = controller.children[0]
+			// @ts-ignore
+			line.material.color.setHex(0x00AAFF);
+
+      if (selectedObject) {
+        this.dispatchEvent({type: event.type, controller, selectedObject});
+      }
+    };
+
+		const endListener = (event: selectEvent) => {
+      const controller = event.target;
+			const line = controller.children[0]
+			// @ts-ignore
+			line.material.color.setHex(0xFFFFFF);
+
+      this.dispatchEvent({type: event.type, controller});
+    };
+
     for (let i = 0; i < 2; ++i) {
       const controller = renderer.xr.getController(i);
-			controller.addEventListener('select', (event) => {
-        const controller = event.target;
-        const selectedObject = this.controllerToObjectMap.get(controller);
-        if (selectedObject) {
-					// @ts-ignore
-          this.dispatchEvent({type: 'select', controller, selectedObject});
-        }
-      });
+			// is beign selected
+			controller.addEventListener('select', selectListener);
+			// is just selected
+			controller.addEventListener('selectstart', selectListener);
+			// just stopped being selected
+			controller.addEventListener('selectend', endListener);
       scene.add(controller);
  
-      const line = new THREE.Line(pointerGeometry);
+      const line = new THREE.Line(pointerGeometry, pointerMaterial);
       line.scale.z = 5;
       controller.add(line);
       this.controllers.push({controller, line});

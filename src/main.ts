@@ -33,6 +33,31 @@ mainScene.add(pickRoot);
 // VR Pointer
 const pickHelper = new ControllerPickHelper(renderer, mainScene);
 
+// Move objects when selected
+const controllerToSelection = new Map();
+pickHelper.addEventListener('selectstart', (event) => {
+	//@ts-ignore | I'm tired of type-gymnastics
+  const {controller, selectedObject} = event;
+  const existingSelection = controllerToSelection.get(controller);
+  if (!existingSelection) {
+    controllerToSelection.set(controller, {
+      object: selectedObject,
+      parent: selectedObject.parent,
+    });
+    controller.attach(selectedObject);
+  }
+});
+ 
+pickHelper.addEventListener('selectend', (event) => {
+	//@ts-ignore | I'm tired of type-gymnastics
+  const {controller} = event;
+  const selection = controllerToSelection.get(controller);
+  if (selection) {
+    controllerToSelection.delete(controller);
+    selection.parent.attach(selection.object);
+  }
+});
+
 // Cube structure
 const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const material = new THREE.MeshPhongMaterial({ 
