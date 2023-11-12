@@ -20,17 +20,48 @@ renderer.setSize(WIDTH, HEIGHT);
 const mainCamera = new THREE.PerspectiveCamera(90, WIDTH / HEIGHT, 0.1, 1000);
 mainCamera.position.set(0, 1.7, 0);
 
-// VR Button
-document.body.appendChild( VRButton.createButton( renderer ) );
-// Enables xr
-renderer.xr.enabled = true;
+// Audio listener (for 3d sounds)
+var audioListener: THREE.AudioListener | null = null;
 
 // Main scene
 const mainScene = new THREE.Scene();
 
+// VR Button
+const vr_button = VRButton.createButton( renderer );
+document.body.appendChild( vr_button );
+// Enables xr
+renderer.xr.enabled = true;
+
 // VR Pickable objects
 const pickRoot = new THREE.Object3D();
 mainScene.add(pickRoot);
+
+// Enables audio context on the first click of the user
+// because AudioContext won't start unless it receives some user input
+document.onclick = () => {
+	if (audioListener) return;
+
+	console.log("FIRST CLICK");
+	
+	audioListener = new THREE.AudioListener();
+	mainCamera.add( audioListener );
+
+	// Sound loader
+	const birdSound = new THREE.PositionalAudio( audioListener );
+	const audioLoader = new THREE.AudioLoader();
+	audioLoader.load( './assets/snd/ambience/birds-isaiah658.ogg', 
+		( buffer ) => {
+			birdSound.setBuffer( buffer );
+			birdSound.setRefDistance( 5 );
+			birdSound.setVolume(0.2);
+			birdSound.position.set(-4, 2.5, -4);
+			birdSound.loop = true;
+			birdSound.play();
+			mainScene.add(birdSound);
+		}
+	);
+
+}
 
 // VR Pointer
 const pickHelper = new ControllerPickHelper(renderer, mainScene);
