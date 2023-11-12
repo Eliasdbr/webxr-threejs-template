@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 // import PickHelper from "./core/PickHelper";
 import ControllerPickHelper from "./core/ControllerPickHelper";
 import TextPlane from "./core/TextPlane";
@@ -33,33 +34,8 @@ mainScene.add(pickRoot);
 
 // VR Pointer
 const pickHelper = new ControllerPickHelper(renderer, mainScene);
-
 // Move objects when selected
 const controllerToSelection = new Map();
-pickHelper.addEventListener('selectstart', (event) => {
-	//@ts-ignore | I'm tired of type-gymnastics
-  const {controller, selectedObject} = event;
-  const existingSelection = controllerToSelection.get(controller);
-  if (!existingSelection) {
-    controllerToSelection.set(controller, {
-      object: selectedObject,
-      parent: selectedObject.parent,
-    });
-    controller.attach(selectedObject);
-		if (selectedObject.name === "TextPlane") textPlane.setText("It changed!");
-  }
-});
- 
-pickHelper.addEventListener('selectend', (event) => {
-	//@ts-ignore | I'm tired of type-gymnastics
-  const {controller} = event;
-  const selection = controllerToSelection.get(controller);
-  if (selection) {
-    controllerToSelection.delete(controller);
-    selection.parent.attach(selection.object);
-		if (selection.object.name === "TextPlane") textPlane.setText("Hello World!");
-  }
-});
 
 // Cube structure
 const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -91,7 +67,7 @@ sunlight.position.set(5, 10, 0);
 sunlight.target.position.set(-5, 0, 0);
 
 // Sky light
-const skyColor = 0xB1E1FF;
+const skyColor = 0xccebff;
 const groundColor = 0xacfc7e;
 const skyIntensity = 1;
 const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
@@ -106,12 +82,57 @@ const texture = loader.load(
 		mainScene.background = texture;
 	});
 
+// Tree model
+const gltfLoader = new GLTFLoader();
+// Loads the whole pack
+const path = "./assets/mdl/plants_pack2.gltf";
+gltfLoader.load(
+	path,
+	(glb) => {
+		const root = glb.scene;
+		console.table("MODELS:", root.children.map(o => o.name));
+		// finds the specific tree model
+		const tree = root.children.find(o => o.name === "Tree-01-1")
+		// console.log("MODEL:", tree);
+		if (tree) {
+			mainScene.add(tree);
+			tree.position.set(-4, 0, -4);
+		}
+	}
+);
+
 // Text plane
 const textPlane = new TextPlane(
 	new THREE.Vector3(0,1,-1.5),
 	"Hello World!",
 );
 textPlane.plane.rotateX(Math.PI / -8);
+
+
+pickHelper.addEventListener('selectstart', (event) => {
+	//@ts-ignore | I'm tired of type-gymnastics
+  const {controller, selectedObject} = event;
+  const existingSelection = controllerToSelection.get(controller);
+  if (!existingSelection) {
+    controllerToSelection.set(controller, {
+      object: selectedObject,
+      parent: selectedObject.parent,
+    });
+    controller.attach(selectedObject);
+		if (selectedObject.name === "TextPlane") textPlane.setText("It changed!");
+  }
+});
+ 
+pickHelper.addEventListener('selectend', (event) => {
+	//@ts-ignore | I'm tired of type-gymnastics
+  const {controller} = event;
+  const selection = controllerToSelection.get(controller);
+  if (selection) {
+    controllerToSelection.delete(controller);
+    selection.parent.attach(selection.object);
+		if (selection.object.name === "TextPlane") textPlane.setText("Hello World!");
+  }
+});
 
 // Adds objects to the main scene
 pickRoot.add(cube);

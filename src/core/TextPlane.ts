@@ -36,6 +36,8 @@ export default class TextPlane {
 		this.width = width;
 		this.height = height;
 
+		this.setText(text);
+
 		return this;
 	}
 
