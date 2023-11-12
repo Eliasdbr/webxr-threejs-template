@@ -106,7 +106,7 @@ const textPlane = new TextPlane(
 	new THREE.Vector3(0,1,-1.5),
 	"Hello World!",
 );
-textPlane.plane.rotateX(Math.PI / -8);
+textPlane.rotateX(Math.PI / -8);
 
 
 pickHelper.addEventListener('selectstart', (event) => {
@@ -136,7 +136,7 @@ pickHelper.addEventListener('selectend', (event) => {
 
 // Adds objects to the main scene
 pickRoot.add(cube);
-pickRoot.add(textPlane.plane);
+pickRoot.add(textPlane);
 mainScene.add(plane);
 mainScene.add(sunlight);
 mainScene.add(sunlight.target);

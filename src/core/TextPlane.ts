@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export default class TextPlane {
+export default class TextPlane extends THREE.Object3D {
 	text: string;
 	plane: THREE.Mesh;
 	texture: THREE.Texture;
@@ -10,9 +10,11 @@ export default class TextPlane {
 	constructor(
 		position: THREE.Vector3 = new THREE.Vector3(0, 0, 0),
 		text: string = "Sample Text",
-		width: number = 0.5,
+		width: number = 1,
 		height: number = 0.5,
 	) {
+		super();
+
 		this.plane = new THREE.Mesh(
 			new THREE.PlaneGeometry(width, height),
 			new THREE.MeshBasicMaterial({
@@ -37,6 +39,8 @@ export default class TextPlane {
 		this.height = height;
 
 		this.setText(text);
+
+		this.add(this.plane);
 
 		return this;
 	}
@@ -74,7 +78,7 @@ export default class TextPlane {
 	}
 
 	setPosition(pos: THREE.Vector3) {
-		this.plane.position.set(pos.x, pos.y, pos.z);
+		this.position.set(pos.x, pos.y, pos.z);
 	}
 
 	setText(text: string) {
