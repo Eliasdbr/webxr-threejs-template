@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 // import PickHelper from "./core/PickHelper";
 import ControllerPickHelper from "./core/ControllerPickHelper";
+import TextPlane from "./core/TextPlane";
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
@@ -15,7 +16,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(WIDTH, HEIGHT);
 
 // CAMERA
-const mainCamera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 0.1, 1000);
+const mainCamera = new THREE.PerspectiveCamera(90, WIDTH / HEIGHT, 0.1, 1000);
 mainCamera.position.set(0, 1.7, 0);
 
 // VR Button
@@ -45,6 +46,7 @@ pickHelper.addEventListener('selectstart', (event) => {
       parent: selectedObject.parent,
     });
     controller.attach(selectedObject);
+		if (selectedObject.name === "TextPlane") textPlane.setText("It changed!");
   }
 });
  
@@ -55,6 +57,7 @@ pickHelper.addEventListener('selectend', (event) => {
   if (selection) {
     controllerToSelection.delete(controller);
     selection.parent.attach(selection.object);
+		if (selection.object.name === "TextPlane") textPlane.setText("Hello World!");
   }
 });
 
@@ -65,8 +68,9 @@ const material = new THREE.MeshPhongMaterial({
 	flatShading: true,
 });
 const cube = new THREE.Mesh(geometry, material);
-cube.position.z = -2;
+cube.position.z = -1.5;
 cube.position.y = 1;
+cube.position.x = 1;
 
 // Plane structure
 const plane = new THREE.Mesh(
@@ -102,8 +106,16 @@ const texture = loader.load(
 		mainScene.background = texture;
 	});
 
+// Text plane
+const textPlane = new TextPlane(
+	new THREE.Vector3(0,1,-1.5),
+	"Hello World!",
+);
+textPlane.plane.rotateX(Math.PI / -8);
+
 // Adds objects to the main scene
 pickRoot.add(cube);
+pickRoot.add(textPlane.plane);
 mainScene.add(plane);
 mainScene.add(sunlight);
 mainScene.add(sunlight.target);

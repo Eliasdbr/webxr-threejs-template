@@ -89,7 +89,7 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
     // restore the colors
     this.objectToColorMap.forEach((color, object) => {
 			// @ts-ignore
-      object.material.emissive.setHex(color);
+      object.material.color.setHex(color);
     });
     this.objectToColorMap.clear();
     this.controllerToObjectMap.clear();
@@ -113,13 +113,17 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
         // save which object this controller picked
         this.controllerToObjectMap.set(controller, pickedObject);
         // highlight the object if we haven't already
-        if (this.objectToColorMap.get(pickedObject) === undefined) {
+        if (
+					this.objectToColorMap.get(pickedObject) === undefined
+					// @ts-ignore
+					&& pickedObject.material.color
+				) {
           // save its color
 					// @ts-ignore
-          this.objectToColorMap.set(pickedObject, pickedObject.material.emissive.getHex());
+          this.objectToColorMap.set(pickedObject, pickedObject.material.color.getHex());
           // set its emissive color to flashing red/yellow
 					// @ts-ignore
-          pickedObject.material.emissive.setHex((time * 8) % 2 > 1 ? 0xFF2000 : 0xFF0000);
+          pickedObject.material.color.setHex((time * 8) % 2 > 1 ? 0x00AAFF : 0x0088DD);
         }
       } else {
         line.scale.z = 5;
