@@ -15,6 +15,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 
 renderer.setSize(WIDTH, HEIGHT);
+renderer.shadowMap.enabled = true;
 
 // CAMERA
 const mainCamera = new THREE.PerspectiveCamera(90, WIDTH / HEIGHT, 0.1, 1000);
@@ -53,7 +54,7 @@ document.onclick = () => {
 		( buffer ) => {
 			birdSound.setBuffer( buffer );
 			birdSound.setRefDistance( 5 );
-			birdSound.setVolume(0.2);
+			birdSound.setVolume(0.5);
 			birdSound.position.set(-4, 2.5, -4);
 			birdSound.loop = true;
 			birdSound.play();
@@ -78,6 +79,7 @@ const cube = new THREE.Mesh(geometry, material);
 cube.position.z = -1.5;
 cube.position.y = 1;
 cube.position.x = 1;
+cube.castShadow = true;
 
 // Plane structure
 const plane = new THREE.Mesh(
@@ -88,14 +90,16 @@ const plane = new THREE.Mesh(
 	})
 );
 plane.rotation.x = Math.PI / -2.0;
+plane.receiveShadow = true;
 
 // Sun light
 const sunColor = 0xFFFFFF;
 const sunIntensity = 1;
 const sunlight = new THREE.DirectionalLight(sunColor, sunIntensity);
 // Sun Position and direction
-sunlight.position.set(5, 10, 0);
+sunlight.position.set(5, 10, 5);
 sunlight.target.position.set(-5, 0, 0);
+sunlight.castShadow = true;
 
 // Sky light
 const skyColor = 0xccebff;
@@ -134,7 +138,7 @@ gltfLoader.load(
 
 // Text plane
 const textPlane = new TextPlane(
-	new THREE.Vector3(0,1,-1.5),
+	new THREE.Vector3(0,1.25,-1),
 	"Hello World!",
 );
 textPlane.rotateX(Math.PI / -8);
