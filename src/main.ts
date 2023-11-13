@@ -108,29 +108,43 @@ const skyIntensity = 1;
 const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 
 // Skybox
-const loader = new THREE.TextureLoader();
-const texture = loader.load(
+const textureLoader = new THREE.TextureLoader();
+const skytexture = textureLoader.load(
 	'./assets/img/sky4.jpg',
 	() => {
-		texture.mapping = THREE.EquirectangularReflectionMapping;
-		texture.colorSpace = THREE.SRGBColorSpace;
-		mainScene.background = texture;
-	});
+		skytexture.mapping = THREE.EquirectangularReflectionMapping;
+		skytexture.colorSpace = THREE.SRGBColorSpace;
+		mainScene.background = skytexture;
+	}
+);
+// Grass
+textureLoader.load(
+	'./assets/img/cartoon_grass.jpeg',
+	grasstexture => {
+		grasstexture.colorSpace = THREE.SRGBColorSpace;
+		grasstexture.repeat.set(5, 5);
+		grasstexture.wrapS = THREE.RepeatWrapping;
+		grasstexture.wrapT = THREE.RepeatWrapping;
+
+		plane.material.map = grasstexture;
+	}
+);
 
 // Tree model
 const gltfLoader = new GLTFLoader();
 // Loads the whole pack
-const path = "./assets/mdl/plants_pack2.gltf";
+const path = "./assets/mdl/Low_Poly_Tree_GLTF.glb";
 gltfLoader.load(
 	path,
 	(glb) => {
 		const root = glb.scene;
-		console.table("MODELS:", root.children.map(o => o.name));
+		// console.table("MODELS:", root.children.map(o => o.name));
 		// finds the specific tree model
-		const tree = root.children.find(o => o.name === "Tree-01-1")
+		const tree = root.children[0];
 		// console.log("MODEL:", tree);
 		if (tree) {
 			mainScene.add(tree);
+			tree.scale.set(0.075, 0.075, 0.075);
 			tree.position.set(-4, 0, -4);
 		}
 	}
