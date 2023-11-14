@@ -27,6 +27,7 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
 	}[];
 	pickedObject?: THREE.Object3D<THREE.Object3DEventMap> | null;
 	tempMatrix: THREE.Matrix4;
+	controllerModel: THREE.Object3D | null;
 
 	// Constructor
 	constructor(renderer: THREE.WebGLRenderer, scene: THREE.Scene) {
@@ -36,6 +37,7 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
     this.objectToColorMap = new Map();
     this.controllerToObjectMap = new Map();
     this.tempMatrix = new THREE.Matrix4();
+		this.controllerModel = null;
 
     const pointerGeometry = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(0, 0, 0),
@@ -94,6 +96,13 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
     this.objectToColorMap.clear();
     this.controllerToObjectMap.clear();
   }
+
+	setControllerModel(obj: THREE.Object3D) {
+		const obj_copy = new THREE.Object3D();
+		obj_copy.copy(obj);
+		this.controllers[0].controller.add(obj);
+		this.controllers[1].controller.add(obj_copy);
+	}
 
 	update(pickablesParent: THREE.Object3D, time: number) {
     this._reset();

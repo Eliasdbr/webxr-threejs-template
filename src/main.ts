@@ -150,6 +150,17 @@ gltfLoader.load(
 	}
 );
 
+gltfLoader.load(
+	"./assets/mdl/controller.gltf",
+	(gltf) => {
+		const root = gltf.scene;
+		const controllerModel = root.children[0];
+		controllerModel.rotation.set( Math.PI/2, 0, Math.PI/2);
+		controllerModel.position.set( 0, 0.01, 0.02 );
+		pickHelper.setControllerModel(controllerModel);
+	}
+);
+
 // Text plane
 const textPlane = new TextPlane(
 	new THREE.Vector3(0,1.25,-1),
