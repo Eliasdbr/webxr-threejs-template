@@ -30,7 +30,7 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
 	controllerModel: THREE.Object3D | null;
 
 	// Constructor
-	constructor(renderer: THREE.WebGLRenderer, scene: THREE.Scene) {
+	constructor(renderer: THREE.WebGLRenderer) {
 		super();
 
 		this.raycaster = new THREE.Raycaster();
@@ -78,10 +78,10 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
 			controller.addEventListener('selectstart', selectListener);
 			// just stopped being selected
 			controller.addEventListener('selectend', endListener);
-      scene.add(controller);
+      // scene.add(controller);
  
       const line = new THREE.Line(pointerGeometry, pointerMaterial);
-      line.scale.z = 5;
+      line.scale.z = 10;
       controller.add(line);
       this.controllers.push({controller, line});
     }
@@ -113,29 +113,34 @@ export default class ControllerPickHelper extends THREE.EventDispatcher<{
       this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
       // get the list of objects the ray intersected
       const intersections = this.raycaster.intersectObjects(pickablesParent.children);
-      if (intersections.length) {
-        const intersection = intersections[0];
-        // make the line touch the object
-        line.scale.z = intersection.distance;
-        // pick the first object. It's the closest one
-        const pickedObject = intersection.object;
-        // save which object this controller picked
-        this.controllerToObjectMap.set(controller, pickedObject);
-        // highlight the object if we haven't already
-        if (
+
+			if (intersections.length) {
+				const intersection = intersections[0];
+				// make the line touch the object
+				line.scale.z = intersection.distance;
+				// pick the first object. It's the closest one
+				const pickedObject = intersection.object;
+
+				// save which object this controller picked
+				this.controllerToObjectMap.set(controller, pickedObject);
+				// highlight the object if we haven't already
+				if (
 					this.objectToColorMap.get(pickedObject) === undefined
 					// @ts-ignore
 					&& pickedObject.material.color
 				) {
-          // save its color
+					// save its color
 					// @ts-ignore
-          this.objectToColorMap.set(pickedObject, pickedObject.material.color.getHex());
-          // set its emissive color to flashing red/yellow
+					this.objectToColorMap.set(pickedObject, pickedObject.material.color.getHex());
+					// set its emissive color to flashing red/yellow
 					// @ts-ignore
-          pickedObject.material.color.setHex((time * 8) % 2 > 1 ? 0x00AAFF : 0x0088DD);
-        }
-      } else {
-        line.scale.z = 5;
+					pickedObject.material.color.setHex((time * 8) % 2 > 1 ? 0x00AAFF : 0x0088DD);
+				}
+			}
+			else {
+        line.scale.z = 10;
+				// @ts-ignore
+				line.material.color.setHex(0xFFFFFF);
       }
     }
   }

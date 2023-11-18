@@ -8,6 +8,8 @@ import TextPlane from "./core/TextPlane";
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 
+const MOVEMENT_SPEED = 0.01;
+
 // RENDERER
 const renderer = new THREE.WebGLRenderer({
 	canvas: document.getElementById("app") as HTMLCanvasElement,
@@ -17,9 +19,16 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(WIDTH, HEIGHT);
 renderer.shadowMap.enabled = true;
 
+// Player object
+const player = new THREE.Object3D();
+
 // CAMERA
 const mainCamera = new THREE.PerspectiveCamera(90, WIDTH / HEIGHT, 0.1, 1000);
-mainCamera.position.set(0, 1.7, 0);
+mainCamera.position.set(0, 1.6, 0);
+player.add(mainCamera);
+
+const playerHead = new THREE.Object3D();
+mainCamera.add(playerHead);
 
 // Audio listener (for 3d sounds)
 var audioListener: THREE.AudioListener | null = null;
@@ -43,7 +52,7 @@ document.onclick = () => {
 	if (audioListener) return;
 
 	console.log("FIRST CLICK");
-	
+
 	audioListener = new THREE.AudioListener();
 	mainCamera.add( audioListener );
 
@@ -65,7 +74,7 @@ document.onclick = () => {
 }
 
 // VR Pointer
-const pickHelper = new ControllerPickHelper(renderer, mainScene);
+const pickHelper = new ControllerPickHelper(renderer);
 // Move objects when selected
 const controllerToSelection = new Map();
 
@@ -194,6 +203,8 @@ pickHelper.addEventListener('selectend', (event) => {
   }
 });
 
+player.add(pickHelper.controllers[0].controller);
+
 // Adds objects to the main scene
 pickRoot.add(cube);
 pickRoot.add(textPlane);
@@ -201,16 +212,37 @@ mainScene.add(plane);
 mainScene.add(sunlight);
 mainScene.add(sunlight.target);
 mainScene.add(skyLight);
-mainScene.add(mainCamera);
+mainScene.add(player);
 
 // Main Loop
 renderer.setAnimationLoop( (time) => {
 	let seconds = time * 0.001;	// converts it to seconds
 
+	// Axis movement (touchpad)
+	let inputSources = renderer.xr.getSession()?.inputSources;
+	if (inputSources && inputSources.length) {
+		for (let source of inputSources) {
+			let gamepad = source.gamepad;
+			if (gamepad) {
+				const quat = player.quaternion.clone();
+				player.quaternion.copy(playerHead.getWorldQuaternion(new THREE.Quaternion()));
+				
+				player.position.y = 0;
+				
+				player.translateX(gamepad.axes[0] * MOVEMENT_SPEED);
+				player.translateZ(gamepad.axes[1] * MOVEMENT_SPEED * (gamepad.axes[1] < 0 ? 2 : 1));
+
+				player.quaternion.copy(quat);
+
+				// Found the first gamepad, exits the loop
+				break;
+			}
+		}
+	}
+
 	// Rotates the cube
 	cube.rotation.x += 0.01;
 	cube.rotation.y += 0.01;
-
 	pickHelper.update(pickRoot, seconds);
 
 	renderer.render(mainScene, mainCamera);
