@@ -225,7 +225,7 @@ renderer.setAnimationLoop( (time) => {
 			let gamepad = source.gamepad;
 			if (gamepad) {
 				const quat = player.quaternion.clone();
-				player.quaternion.copy(playerHead.getWorldQuaternion(new THREE.Quaternion()));
+				player.quaternion.copy(pickHelper.controllers[0].controller.getWorldQuaternion(new THREE.Quaternion()));
 				
 				player.position.y = 0;
 				
