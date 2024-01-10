@@ -118,15 +118,21 @@ const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 
 // Skybox
 const textureLoader = new THREE.TextureLoader();
-const skytexture = textureLoader.load(
+textureLoader.load(
 	'./assets/img/sky4.jpg',
-	() => {
+	skytexture => {
 		skytexture.mapping = THREE.EquirectangularReflectionMapping;
 		skytexture.colorSpace = THREE.SRGBColorSpace;
 		mainScene.background = skytexture;
+	},
+	() => {},
+	error => {
+		console.log("Error while loading image", error)
 	}
 );
 // Grass
+plane.visible = false;
+
 textureLoader.load(
 	'./assets/img/cartoon_grass.jpeg',
 	grasstexture => {
@@ -136,6 +142,11 @@ textureLoader.load(
 		grasstexture.wrapT = THREE.RepeatWrapping;
 
 		plane.material.map = grasstexture;
+		plane.visible = true;
+	},
+	() => {},
+	error => {
+		console.log("Error while loading image", error)
 	}
 );
 
