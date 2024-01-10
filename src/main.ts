@@ -171,6 +171,38 @@ gltfLoader.load(
 );
 
 gltfLoader.load(
+	"./assets/mdl/detail_barrel.glb",
+	(glb) => {
+		const root = glb.scene;
+		// console.table("MODELS:", root.children.map(o => o.name));
+		// finds the specific tree model
+		const barrel = root.children[0];
+		// console.log("MODEL:", tree);
+		if (barrel) {
+			mainScene.add(barrel);
+			barrel.scale.set(4.0, 4.0, 4.0);
+			barrel.position.set(-4, 0, 4);
+		}
+	}
+);
+gltfLoader.load(
+	"./assets/mdl/wall_gate.glb",
+	(glb) => {
+		const root = glb.scene;
+		// console.table("MODELS:", root.children.map(o => o.name));
+		// finds the specific tree model
+		const wall_gate = root.children[0];
+		// console.log("MODEL:", tree);
+		if (wall_gate) {
+			mainScene.add(wall_gate);
+			wall_gate.scale.set(4.0, 4.0, 4.0);
+			wall_gate.position.set(4, 0, 4);
+		}
+	}
+);
+
+
+gltfLoader.load(
 	"./assets/mdl/controller.gltf",
 	(gltf) => {
 		const root = gltf.scene;
