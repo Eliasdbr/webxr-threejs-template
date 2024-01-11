@@ -257,6 +257,23 @@ mainScene.add(sunlight.target);
 mainScene.add(skyLight);
 mainScene.add(player);
 
+// Temp: keyboard movement
+var keyZ = 0;
+var keyX = 0;
+
+window.addEventListener("keydown", (event) => {
+	keyZ = +(event.key === "w") - +(event.key === "s");
+	keyX = +(event.key === "d") - +(event.key === "a");
+})
+window.addEventListener("keyup", (event) => {
+	if (event.key === "w" || event.key === "s") {
+		keyZ = 0;
+	}
+	if (event.key === "a" || event.key === "d") {
+		keyX = 0;
+	}
+})
+
 // Main Loop
 renderer.setAnimationLoop( (time) => {
 	let seconds = time * 0.001;	// converts it to seconds
@@ -272,8 +289,8 @@ renderer.setAnimationLoop( (time) => {
 				
 				player.position.y = 0;
 				
-				player.translateX(gamepad.axes[0] * MOVEMENT_SPEED);
-				player.translateZ(gamepad.axes[1] * MOVEMENT_SPEED * (gamepad.axes[1] < 0 ? 2 : 1));
+				player.translateX(gamepad.axes[0] * MOVEMENT_SPEED + keyX*MOVEMENT_SPEED*2);
+				player.translateZ(gamepad.axes[1] * MOVEMENT_SPEED * (gamepad.axes[1] < 0 ? 2 : 1) - keyZ*MOVEMENT_SPEED*2);
 
 				player.quaternion.copy(quat);
 
