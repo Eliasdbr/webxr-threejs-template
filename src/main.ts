@@ -1,61 +1,23 @@
 import * as THREE from "three";
-import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 // import PickHelper from "./core/PickHelper";
 import ControllerPickHelper from "./core/ControllerPickHelper";
 import TextPlane from "./core/TextPlane";
-
-const WIDTH = window.innerWidth;
-const HEIGHT = window.innerHeight;
+import GameScene from "./core/GameScene";
 
 const MOVEMENT_SPEED = 0.01;
-
-// RENDERER
-const renderer = new THREE.WebGLRenderer({
-	canvas: document.getElementById("app") as HTMLCanvasElement,
-	antialias: true,
-});
-
-renderer.setSize(WIDTH, HEIGHT);
-renderer.shadowMap.enabled = true;
 
 // Player object
 const player = new THREE.Object3D();
 
-// CAMERA
-const mainCamera = new THREE.PerspectiveCamera(90, WIDTH / HEIGHT, 0.1, 1000);
-mainCamera.position.set(0, 1.6, 0);
-player.add(mainCamera);
-
-const playerHead = new THREE.Object3D();
-mainCamera.add(playerHead);
-
-// Audio listener (for 3d sounds)
-var audioListener: THREE.AudioListener | null = null;
-
 // Main scene
-const mainScene = new THREE.Scene();
-
-// VR Button
-const vr_button = VRButton.createButton( renderer );
-document.body.appendChild( vr_button );
-// Enables xr
-renderer.xr.enabled = true;
+const mainScene = GameScene.instance.scene
 
 // VR Pickable objects
 const pickRoot = new THREE.Object3D();
 mainScene.add(pickRoot);
 
-// Enables audio context on the first click of the user
-// because AudioContext won't start unless it receives some user input
-document.onclick = () => {
-	if (audioListener) return;
-
-	console.log("FIRST CLICK");
-
-	audioListener = new THREE.AudioListener();
-	mainCamera.add( audioListener );
-
+GameScene.instance.onAudioInit = (audioListener) => {
 	// Sound loader
 	const birdSound = new THREE.PositionalAudio( audioListener );
 	const audioLoader = new THREE.AudioLoader();
@@ -70,11 +32,10 @@ document.onclick = () => {
 			mainScene.add(birdSound);
 		}
 	);
-
 }
 
 // VR Pointer
-const pickHelper = new ControllerPickHelper(renderer);
+const pickHelper = new ControllerPickHelper(GameScene.instance.renderer);
 // Move objects when selected
 const controllerToSelection = new Map();
 
@@ -247,6 +208,7 @@ pickHelper.addEventListener('selectend', (event) => {
 });
 
 player.add(pickHelper.controllers[0].controller);
+player.add(GameScene.instance.camera);
 
 // Adds objects to the main scene
 pickRoot.add(cube);
@@ -275,11 +237,11 @@ window.addEventListener("keyup", (event) => {
 })
 
 // Main Loop
-renderer.setAnimationLoop( (time) => {
+GameScene.instance.update = (time) => {
 	let seconds = time * 0.001;	// converts it to seconds
 
 	// Axis movement (touchpad)
-	let inputSources = renderer.xr.getSession()?.inputSources;
+	let inputSources = GameScene.instance.renderer.xr.getSession()?.inputSources;
 	if (inputSources && inputSources.length) {
 		for (let source of inputSources) {
 			let gamepad = source.gamepad;
@@ -304,7 +266,4 @@ renderer.setAnimationLoop( (time) => {
 	cube.rotation.x += 0.01;
 	cube.rotation.y += 0.01;
 	pickHelper.update(pickRoot, seconds);
-
-	renderer.render(mainScene, mainCamera);
-
-} );
+};
