@@ -1,21 +1,17 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-// import PickHelper from "./core/PickHelper";
 import ControllerPickHelper from "./core/ControllerPickHelper";
 import TextPlane from "./core/TextPlane";
 import GameScene from "./core/GameScene";
+import Player from "./core/Player";
+import Entity from "./core/Entity";
+import ModelManager from "./core/ModelManager";
 
-const MOVEMENT_SPEED = 0.01;
-
-// Player object
-const player = new THREE.Object3D();
-
-// Main scene
-const mainScene = GameScene.instance.scene
+// Player Entity
+const player = new Player(new THREE.Vector3(0.0, 0.0, 0.0));
 
 // VR Pickable objects
 const pickRoot = new THREE.Object3D();
-mainScene.add(pickRoot);
+GameScene.instance.addToWorld(pickRoot);
 
 GameScene.instance.onAudioInit = (audioListener) => {
 	// Sound loader
@@ -29,7 +25,7 @@ GameScene.instance.onAudioInit = (audioListener) => {
 			birdSound.position.set(-4, 2.5, -4);
 			birdSound.loop = true;
 			birdSound.play();
-			mainScene.add(birdSound);
+			// mainScene.add(birdSound);
 		}
 	);
 }
@@ -84,7 +80,7 @@ textureLoader.load(
 	skytexture => {
 		skytexture.mapping = THREE.EquirectangularReflectionMapping;
 		skytexture.colorSpace = THREE.SRGBColorSpace;
-		mainScene.background = skytexture;
+		GameScene.instance.background = skytexture;
 	},
 	() => {},
 	error => {
@@ -112,67 +108,30 @@ textureLoader.load(
 );
 
 // Tree model
-const gltfLoader = new GLTFLoader();
-// Loads the whole pack
-const path = "./assets/mdl/Low_Poly_Tree_GLTF.glb";
-gltfLoader.load(
-	path,
-	(glb) => {
-		const root = glb.scene;
-		// console.table("MODELS:", root.children.map(o => o.name));
-		// finds the specific tree model
-		const tree = root.children[0];
-		// console.log("MODEL:", tree);
-		if (tree) {
-			mainScene.add(tree);
-			tree.scale.set(0.075, 0.075, 0.075);
-			tree.position.set(-4, 0, -4);
-		}
-	}
-);
+const tree_model = new Entity(new THREE.Vector3(-4, -0.2, -4));
+tree_model.model_name = "Low_Poly_Tree_GLTF.glb";
+tree_model.scale = 0.075;
+tree_model.rotation = new THREE.Vector3(Math.PI/2, 0, 0);
+GameScene.instance.addEntity(tree_model);
 
-gltfLoader.load(
-	"./assets/mdl/detail_barrel.glb",
-	(glb) => {
-		const root = glb.scene;
-		// console.table("MODELS:", root.children.map(o => o.name));
-		// finds the specific tree model
-		const barrel = root.children[0];
-		// console.log("MODEL:", tree);
-		if (barrel) {
-			mainScene.add(barrel);
-			barrel.scale.set(4.0, 4.0, 4.0);
-			barrel.position.set(-4, 0, 4);
-		}
-	}
-);
-gltfLoader.load(
-	"./assets/mdl/wall_gate.glb",
-	(glb) => {
-		const root = glb.scene;
-		// console.table("MODELS:", root.children.map(o => o.name));
-		// finds the specific tree model
-		const wall_gate = root.children[0];
-		// console.log("MODEL:", tree);
-		if (wall_gate) {
-			mainScene.add(wall_gate);
-			wall_gate.scale.set(4.0, 4.0, 4.0);
-			wall_gate.position.set(4, 0, 4);
-		}
-	}
-);
+// Barrel model
+const barrel_model = new Entity(new THREE.Vector3(-4, 0, 4));
+barrel_model.model_name = "detail_barrel.glb";
+barrel_model.scale = 4.0;
+GameScene.instance.addEntity(barrel_model);
 
+// Wall Model
+const wall_model = new Entity(new THREE.Vector3(4, 0, 4));
+wall_model.model_name = "wall_gate.glb";
+wall_model.scale = 4.0;
+GameScene.instance.addEntity(wall_model);
 
-gltfLoader.load(
-	"./assets/mdl/controller.gltf",
-	(gltf) => {
-		const root = gltf.scene;
-		const controllerModel = root.children[0];
-		controllerModel.rotation.set( Math.PI/2, 0, Math.PI/2);
-		controllerModel.position.set( 0, 0.01, 0.02 );
-		pickHelper.setControllerModel(controllerModel);
-	}
-);
+// Controller Model
+const controller_model = await ModelManager.use_model("controller.gltf");
+controller_model.position.set(0, 0.01, 0.02);
+controller_model.rotation.set(Math.PI/2, 0, Math.PI/2);
+pickHelper.setControllerModel(controller_model);
+
 
 // Text plane
 const textPlane = new TextPlane(
@@ -207,60 +166,43 @@ pickHelper.addEventListener('selectend', (event) => {
   }
 });
 
-player.add(pickHelper.controllers[0].controller);
-player.add(GameScene.instance.camera);
+player.setController(pickHelper.controllers[0].controller);
+player.appendCamera(GameScene.instance.camera);
 
 // Adds objects to the main scene
 pickRoot.add(cube);
 pickRoot.add(textPlane);
-mainScene.add(plane);
-mainScene.add(sunlight);
-mainScene.add(sunlight.target);
-mainScene.add(skyLight);
-mainScene.add(player);
+GameScene.instance.addToWorld(plane);
+GameScene.instance.addToWorld(sunlight);
+GameScene.instance.addToWorld(sunlight.target);
+GameScene.instance.addToWorld(skyLight);
+GameScene.instance.addEntity(player);
+
+// Main scene
+GameScene.instance.load()
 
 // Temp: keyboard movement
-var keyZ = 0;
-var keyX = 0;
+// var keyZ = 0;
+// var keyX = 0;
 
-window.addEventListener("keydown", (event) => {
-	keyZ = +(event.key === "w") - +(event.key === "s");
-	keyX = +(event.key === "d") - +(event.key === "a");
-})
-window.addEventListener("keyup", (event) => {
-	if (event.key === "w" || event.key === "s") {
-		keyZ = 0;
-	}
-	if (event.key === "a" || event.key === "d") {
-		keyX = 0;
-	}
-})
+// window.addEventListener("keydown", (event) => {
+// 	keyZ = +(event.key === "w") - +(event.key === "s");
+// 	keyX = +(event.key === "d") - +(event.key === "a");
+// })
+// window.addEventListener("keyup", (event) => {
+// 	if (event.key === "w" || event.key === "s") {
+// 		keyZ = 0;
+// 	}
+// 	if (event.key === "a" || event.key === "d") {
+// 		keyX = 0;
+// 	}
+// })
 
 // Main Loop
 GameScene.instance.update = (time) => {
 	let seconds = time * 0.001;	// converts it to seconds
 
-	// Axis movement (touchpad)
-	let inputSources = GameScene.instance.renderer.xr.getSession()?.inputSources;
-	if (inputSources && inputSources.length) {
-		for (let source of inputSources) {
-			let gamepad = source.gamepad;
-			if (gamepad) {
-				const quat = player.quaternion.clone();
-				player.quaternion.copy(pickHelper.controllers[0].controller.getWorldQuaternion(new THREE.Quaternion()));
-				
-				player.position.y = 0;
-				
-				player.translateX(gamepad.axes[0] * MOVEMENT_SPEED + keyX*MOVEMENT_SPEED*2);
-				player.translateZ(gamepad.axes[1] * MOVEMENT_SPEED * (gamepad.axes[1] < 0 ? 2 : 1) - keyZ*MOVEMENT_SPEED*2);
-
-				player.quaternion.copy(quat);
-
-				// Found the first gamepad, exits the loop
-				break;
-			}
-		}
-	}
+	player.update();
 
 	// Rotates the cube
 	cube.rotation.x += 0.01;
