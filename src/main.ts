@@ -24,7 +24,7 @@ GameScene.instance.onAudioInit = (audioListener) => {
 			birdSound.position.set(-4, 2.5, -4);
 			birdSound.loop = true;
 			birdSound.play();
-			// mainScene.add(birdSound);
+			GameScene.instance.addToWorld(birdSound);
 		}
 	);
 }
@@ -180,7 +180,7 @@ pickHelper.addEventListener('selectend', (event) => {
 });
 
 // Player Entity
-const player = new Player(new THREE.Vector3(0.0, 2.0, 0.0));
+const player = new Player(new THREE.Vector3(0, 0, 0));
 
 player.setController(pickHelper.controllers[0].controller);
 player.appendCamera(GameScene.instance.camera);
