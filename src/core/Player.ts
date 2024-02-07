@@ -64,20 +64,20 @@ class Player extends Entity {
 	}
 
 	private moveBasedOnInput(input: Gamepad) {
-		if (this._mesh && this._controller) {
-			const quat = this._mesh.quaternion.clone();
-			this._mesh.quaternion.copy(
-				this._controller.getWorldQuaternion(new THREE.Quaternion())
-			);
-			
-			this._mesh.translateX(
-				input.axes[0] * this.MOVEMENT_SPEED
-			);
-			this._mesh.translateZ(
-				input.axes[1] * this.MOVEMENT_SPEED * (input.axes[1] < 0 ? 2 : 1)
-			);
+		if (this._collision_shape && this._controller) {
 
-			this._mesh.quaternion.copy(quat);
+			const contr_quat = this._controller.getWorldQuaternion(new THREE.Quaternion());
+
+			const final_vector = new THREE.Vector3(
+				input.axes[0] * this.MOVEMENT_SPEED,
+				0,
+				input.axes[1] * this.MOVEMENT_SPEED * (input.axes[1] < 0 ? 2 : 1),
+			).applyQuaternion(contr_quat);
+			
+			this._collision_shape.position.x += final_vector.x
+
+			this._collision_shape.position.z += final_vector.z
+
 		}
 	}
 
