@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
+
 import GameScene from "./GameScene";
 import Entity from "./Entity";
 
@@ -12,9 +14,30 @@ class Player extends Entity {
 		super(origin);
 
 		this._mesh = new THREE.Object3D();
+		this._mesh.position.set(origin.x, origin.y, origin.z);
+
+		this._collision_shape = new CANNON.Body({
+			type: CANNON.Body.DYNAMIC,
+			fixedRotation: true,
+			mass: 1.0,
+			shape: new CANNON.Box(new CANNON.Vec3(0.25, 0.85, 0.25)),
+			material: new CANNON.Material({
+				friction: 0.5,
+			}),
+		});
+		this._collision_shape.shapeOffsets[0] = new CANNON.Vec3(
+			0.0		+ origin.x, 
+			0.85	+ origin.y,
+			0.0		+ origin.z,
+		);
 	}
 
 	public appendCamera(cam: THREE.PerspectiveCamera) {
+		if (this._mesh) cam.position.set(
+			this._mesh?.position.x,
+			this._mesh?.position.y,
+			this._mesh?.position.z,
+		);
 		this._mesh?.add(cam);
 	}
 
@@ -47,8 +70,6 @@ class Player extends Entity {
 				this._controller.getWorldQuaternion(new THREE.Quaternion())
 			);
 			
-			this._mesh.position.y = 0;
-			
 			this._mesh.translateX(
 				input.axes[0] * this.MOVEMENT_SPEED
 			);
@@ -62,6 +83,9 @@ class Player extends Entity {
 
 	/** Process the player actions and events each frame */
 	public update() {
+		// Calls the Entity update
+		super.update();
+
 		// Player Input
 		let gamepad = this.updateInput();
 

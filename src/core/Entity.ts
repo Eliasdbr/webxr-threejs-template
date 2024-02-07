@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
 import ModelManager from "./ModelManager";
 
 class Entity {
@@ -6,7 +7,8 @@ class Entity {
 	protected _origin: THREE.Vector3;
 	protected _mesh: THREE.Mesh | THREE.Object3D | null = null;
 	protected _scale: number = 1.0;
-	protected _rotation: THREE.Vector3
+	protected _rotation: THREE.Vector3;
+	protected _collision_shape: CANNON.Body | null = null;
 	
 	/**
 	 * Uses the ModelManager class to load a model providing a filename.
@@ -15,9 +17,22 @@ class Entity {
 	 * */
 	public model_name: string = "";
 
-	/** Mesh getter. Read Only */
+	/** Mesh getter */
 	public get mesh() {
 		return this._mesh;
+	}
+	/** Mesh setter */
+	public set mesh(value: THREE.Object3D | null) {
+		this._mesh = value;
+	}
+
+	/** Collision shape getter */
+	public get collision() {
+		return this._collision_shape;
+	}
+	/** Collision shape setter */
+	public set collision(value: CANNON.Body | null) {
+		this._collision_shape = value;
 	}
 
 	/** Scale setter. Write Only */
@@ -47,6 +62,27 @@ class Entity {
 		}
 	}
 
+	private physics_update() {
+		if (this._collision_shape) {
+			const transformed_pos = new THREE.Vector3(
+				this._collision_shape.position.x,
+				this._collision_shape.position.y,
+				this._collision_shape.position.z,
+			);
+			const transformed_rot = new THREE.Quaternion(
+				this._collision_shape.quaternion.x,
+				this._collision_shape.quaternion.y,
+				this._collision_shape.quaternion.z,
+				this._collision_shape.quaternion.w,
+			);
+			
+			this._origin = transformed_pos;
+			this._rotation = new THREE.Vector3().applyQuaternion(transformed_rot);
+
+			this._mesh?.position.copy(transformed_pos);
+			this._mesh?.quaternion.copy(transformed_rot);
+		}
+	}
 
 	public load = async () => {
 		// Loads the model
@@ -73,7 +109,9 @@ class Entity {
 		}
 	}
 
-	public update() {}
+	public update() {
+		this.physics_update();
+	}
 
 }
 

@@ -8,6 +8,10 @@ import {
 	SRGBColorSpace,
 	Object3D,
 } from "three";
+import * as CANNON from "cannon-es";
+import CannonDebugger from "cannon-es-debugger";
+
+
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 import Entity from "./Entity";
 
@@ -18,6 +22,9 @@ class GameScene {
 	private _entities: Entity[] = [];
 	private _background: Texture | null = null;
 	private _world: Object3D = new Object3D();
+	private _phys_world: CANNON.World;
+	// TODO: Cannon debugger must update its types
+	private _phys_dbg: { update: () => void };
 
 	public static get instance() {
 		return this._instance;
@@ -62,10 +69,17 @@ class GameScene {
 		// CAMERA SECTION
 		const aspectRatio = this._width / this._height;
 		this.camera = new PerspectiveCamera(90, aspectRatio, 0.1, 1000);
-		this.camera.position.set(0, 1.6, 0);
+		this.camera.position.set(0, 0, 0);
 
 		// WORLD SECTION
 		this._scene.add(this._world);
+		// PHYSICS WORLD
+		this._phys_world = new CANNON.World({
+			gravity: new CANNON.Vec3(0, -9.82, 0),
+		});
+		
+		// PHYSICS DEBUGGER
+		this._phys_dbg = CannonDebugger(this._scene, this._phys_world);
 
 		// AUDIO SECTION
 		this.audio_listener = null;
@@ -87,7 +101,9 @@ class GameScene {
 
 		// GAME LOOP
 		this.renderer.setAnimationLoop((time) => {
-			this.update(time);
+			this._internalUpdate(time);
+			// If physics debugging is on, update debugger
+			if (this._phys_dbg) this._phys_dbg.update();
 			this.renderer.render(this._scene, this.camera);
 		});
 
@@ -111,12 +127,19 @@ class GameScene {
 		for (let ent of this._entities) {
 			await ent.load();
 			if (ent.mesh) this._scene.add(ent.mesh);
+			if (ent.collision) this._phys_world.addBody(ent.collision);
 		}
+	}
+
+	private _internalUpdate(time: number) {
+		this._phys_world.fixedStep();
+		this._phys_dbg.update();
+		this.update(time);
 	}
 
 	/** Update method. Runs every frame */
 	public update = (_time: number) => {
-		// nothing
+
 	}
 
 	/** Excecutes once the audio has initialized */

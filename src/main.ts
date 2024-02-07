@@ -1,13 +1,12 @@
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
+
 import ControllerPickHelper from "./core/ControllerPickHelper";
 import TextPlane from "./core/TextPlane";
 import GameScene from "./core/GameScene";
 import Player from "./core/Player";
 import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
-
-// Player Entity
-const player = new Player(new THREE.Vector3(0.0, 0.0, 0.0));
 
 // VR Pickable objects
 const pickRoot = new THREE.Object3D();
@@ -48,15 +47,29 @@ cube.position.x = 1;
 cube.castShadow = true;
 
 // Plane structure
-const plane = new THREE.Mesh(
+const planeMesh = new THREE.Mesh(
 	new THREE.PlaneGeometry(10, 10),
 	new THREE.MeshPhongMaterial({
 		color: 0x80C000,
 		flatShading: true,
 	})
 );
-plane.rotation.x = Math.PI / -2.0;
-plane.receiveShadow = true;
+planeMesh.rotation.x = Math.PI / -2.0;
+planeMesh.receiveShadow = true;
+
+// Plane collision
+const planeCollision = new CANNON.Body({
+	type: CANNON.Body.STATIC,
+	material: new CANNON.Material({
+		friction: 0.5,
+	}),
+	shape: new CANNON.Plane(),
+});
+planeCollision.quaternion.setFromEuler(-Math.PI / 2.0, 0, 0);
+// Plane Entity
+const plane = new Entity(new THREE.Vector3(0,0,0));
+plane.collision = planeCollision;
+plane.mesh = planeMesh;
 
 // Sun light
 const sunColor = 0xFFFFFF;
@@ -88,7 +101,7 @@ textureLoader.load(
 	}
 );
 // Grass
-plane.visible = false;
+planeMesh.visible = false;
 
 textureLoader.load(
 	'./assets/img/cartoon_grass.jpeg',
@@ -98,8 +111,8 @@ textureLoader.load(
 		grasstexture.wrapS = THREE.RepeatWrapping;
 		grasstexture.wrapT = THREE.RepeatWrapping;
 
-		plane.material.map = grasstexture;
-		plane.visible = true;
+		planeMesh.material.map = grasstexture;
+		planeMesh.visible = true;
 	},
 	() => {},
 	error => {
@@ -166,16 +179,19 @@ pickHelper.addEventListener('selectend', (event) => {
   }
 });
 
+// Player Entity
+const player = new Player(new THREE.Vector3(0.0, 2.0, 0.0));
+
 player.setController(pickHelper.controllers[0].controller);
 player.appendCamera(GameScene.instance.camera);
 
 // Adds objects to the main scene
 pickRoot.add(cube);
 pickRoot.add(textPlane);
-GameScene.instance.addToWorld(plane);
 GameScene.instance.addToWorld(sunlight);
 GameScene.instance.addToWorld(sunlight.target);
 GameScene.instance.addToWorld(skyLight);
+GameScene.instance.addEntity(plane);
 GameScene.instance.addEntity(player);
 
 // Main scene
@@ -185,10 +201,9 @@ GameScene.instance.load()
 // var keyZ = 0;
 // var keyX = 0;
 
-// window.addEventListener("keydown", (event) => {
-// 	keyZ = +(event.key === "w") - +(event.key === "s");
-// 	keyX = +(event.key === "d") - +(event.key === "a");
-// })
+window.addEventListener("keydown", (event) => {
+	event.key === "Space";
+})
 // window.addEventListener("keyup", (event) => {
 // 	if (event.key === "w" || event.key === "s") {
 // 		keyZ = 0;
@@ -199,9 +214,10 @@ GameScene.instance.load()
 // })
 
 // Main Loop
-GameScene.instance.update = (time) => {
+GameScene.instance.update = function(time) {
 	let seconds = time * 0.001;	// converts it to seconds
 
+	// Player's input and movement
 	player.update();
 
 	// Rotates the cube
