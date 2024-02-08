@@ -113,6 +113,19 @@ class Entity {
 		this.physics_update();
 	}
 
+	public destroy() {
+		if (this.model_name) {
+			ModelManager.request_free_model(this.model_name);
+		}
+		if (this._mesh) {
+			this._mesh.removeFromParent();
+		}
+		if (this._collision_shape) {
+			this._collision_shape.world?.removeBody(this._collision_shape);
+		}
+		
+	}
+
 }
 
 export default Entity;

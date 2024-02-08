@@ -40,11 +40,23 @@ const material = new THREE.MeshPhongMaterial({
 	color: 0xFFFFFF,
 	flatShading: true,
 });
-const cube = new THREE.Mesh(geometry, material);
-cube.position.z = -1.5;
-cube.position.y = 1;
-cube.position.x = 1;
-cube.castShadow = true;
+const cubeMesh = new THREE.Mesh(geometry, material);
+cubeMesh.castShadow = true;
+// Cube collision
+const cubeCollision = new CANNON.Body({
+	type: CANNON.Body.DYNAMIC,
+	material: new CANNON.Material({
+		friction: 0.5,
+	}),
+	mass: 1,
+	shape: new CANNON.Box(new CANNON.Vec3(0.25, 0.25, 0.25)),
+});
+cubeCollision.position.set(1, 1, -1.5);
+cubeCollision.quaternion.setFromEuler(-Math.PI / 4.0, -Math.PI / 4.0, 0);
+// Cube Entity
+const cube = new Entity(new THREE.Vector3(1, 1, -1.5));
+cube.collision = cubeCollision;
+cube.mesh = cubeMesh;
 
 // Plane structure
 const planeMesh = new THREE.Mesh(
@@ -186,32 +198,25 @@ player.setController(pickHelper.controllers[0].controller);
 player.appendCamera(GameScene.instance.camera);
 
 // Adds objects to the main scene
-pickRoot.add(cube);
 pickRoot.add(textPlane);
 GameScene.instance.addToWorld(sunlight);
 GameScene.instance.addToWorld(sunlight.target);
 GameScene.instance.addToWorld(skyLight);
 GameScene.instance.addEntity(plane);
 GameScene.instance.addEntity(player);
+GameScene.instance.addEntity(cube);
 
 // Main scene
 GameScene.instance.load()
 
-// Temp: keyboard movement
-// var keyZ = 0;
-// var keyX = 0;
-
 window.addEventListener("keydown", (event) => {
 	event.key === "Space";
 })
-// window.addEventListener("keyup", (event) => {
-// 	if (event.key === "w" || event.key === "s") {
-// 		keyZ = 0;
-// 	}
-// 	if (event.key === "a" || event.key === "d") {
-// 		keyX = 0;
-// 	}
-// })
+
+// TEMP: Testing the Entity.destroy() method.
+setTimeout(() => {
+	cube.destroy();
+}, 5000);
 
 // Main Loop
 GameScene.instance.update = function(time) {
@@ -220,8 +225,9 @@ GameScene.instance.update = function(time) {
 	// Player's input and movement
 	player.update();
 
+	// Update cube logic
+	cube.update();
+
 	// Rotates the cube
-	cube.rotation.x += 0.01;
-	cube.rotation.y += 0.01;
 	pickHelper.update(pickRoot, seconds);
 };

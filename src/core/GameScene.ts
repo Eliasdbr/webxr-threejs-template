@@ -24,7 +24,7 @@ class GameScene {
 	private _world: Object3D = new Object3D();
 	private _phys_world: CANNON.World;
 	// TODO: Cannon debugger must update its types
-	private _phys_dbg: { update: () => void };
+	private _phys_dbg: { update: () => void } | null = null;
 
 	public static get instance() {
 		return this._instance;
@@ -133,7 +133,7 @@ class GameScene {
 
 	private _internalUpdate(time: number) {
 		this._phys_world.fixedStep();
-		this._phys_dbg.update();
+		if (this._phys_dbg) this._phys_dbg.update();
 		this.update(time);
 	}
 
