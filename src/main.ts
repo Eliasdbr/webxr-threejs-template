@@ -7,6 +7,7 @@ import GameScene from "./core/GameScene";
 import Player from "./core/Player";
 import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
+import TextureManager from "./core/TextureManager";
 
 // VR Pickable objects
 const pickRoot = new THREE.Object3D();
@@ -83,6 +84,18 @@ const plane = new Entity(new THREE.Vector3(0,0,0));
 plane.collision = planeCollision;
 plane.mesh = planeMesh;
 
+// Grass Texture for the plane
+planeMesh.visible = false;	// Hides the plane until the grass texture loads
+
+const grasstexture = await TextureManager.use_texture("cartoon_grass.jpeg");
+grasstexture.colorSpace = THREE.SRGBColorSpace;
+grasstexture.repeat.set(5, 5);
+grasstexture.wrapS = THREE.RepeatWrapping;
+grasstexture.wrapT = THREE.RepeatWrapping;
+
+planeMesh.material.map = grasstexture;
+planeMesh.visible = true;
+
 // Sun light
 const sunColor = 0xFFFFFF;
 const sunIntensity = 1;
@@ -99,38 +112,10 @@ const skyIntensity = 1;
 const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 
 // Skybox
-const textureLoader = new THREE.TextureLoader();
-textureLoader.load(
-	'./assets/img/sky4.jpg',
-	skytexture => {
-		skytexture.mapping = THREE.EquirectangularReflectionMapping;
-		skytexture.colorSpace = THREE.SRGBColorSpace;
-		GameScene.instance.background = skytexture;
-	},
-	() => {},
-	error => {
-		console.log("Error while loading image", error)
-	}
-);
-// Grass
-planeMesh.visible = false;
-
-textureLoader.load(
-	'./assets/img/cartoon_grass.jpeg',
-	grasstexture => {
-		grasstexture.colorSpace = THREE.SRGBColorSpace;
-		grasstexture.repeat.set(5, 5);
-		grasstexture.wrapS = THREE.RepeatWrapping;
-		grasstexture.wrapT = THREE.RepeatWrapping;
-
-		planeMesh.material.map = grasstexture;
-		planeMesh.visible = true;
-	},
-	() => {},
-	error => {
-		console.log("Error while loading image", error)
-	}
-);
+const skytexture = await TextureManager.use_texture("sky4.jpg");
+skytexture.mapping = THREE.EquirectangularReflectionMapping;
+skytexture.colorSpace = THREE.SRGBColorSpace;
+GameScene.instance.background = skytexture;
 
 // Tree model
 const tree_model = new Entity(new THREE.Vector3(-4, -0.2, -4));
