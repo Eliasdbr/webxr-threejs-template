@@ -38,6 +38,8 @@ class GameScene {
 	public camera: PerspectiveCamera;
 	public audio_listener: AudioListener | null;
 
+	public debug_show_collisions: boolean = false;
+
 	public set background(texture: Texture | null) {
 		if (texture) {
 			this._background = texture;
@@ -102,8 +104,6 @@ class GameScene {
 		// GAME LOOP
 		this.renderer.setAnimationLoop((time) => {
 			this._internalUpdate(time);
-			// If physics debugging is on, update debugger
-			if (this._phys_dbg) this._phys_dbg.update();
 			this.renderer.render(this._scene, this.camera);
 		});
 
@@ -133,7 +133,8 @@ class GameScene {
 
 	private _internalUpdate(time: number) {
 		this._phys_world.fixedStep();
-		if (this._phys_dbg) this._phys_dbg.update();
+		// Update physics' debug rendering if enabled
+		if (this._phys_dbg && this.debug_show_collisions) this._phys_dbg.update();
 		this.update(time);
 	}
 

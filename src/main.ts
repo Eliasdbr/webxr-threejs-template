@@ -14,11 +14,10 @@ import AudioManager from "./core/AudioManager";
 const pickRoot = new THREE.Object3D();
 GameScene.instance.addToWorld(pickRoot);
 
+// GameScene.instance.debug_show_collisions = false;
+
 // Setup sound effects
-
-
 GameScene.instance.onAudioInit = async (audioListener) => {
-	// Sound loader
 	const birdSoundEmitter = new THREE.PositionalAudio( audioListener );
 	const birdSound = await AudioManager.use_audio('ambience/birds-isaiah658.ogg');
 	birdSoundEmitter.setBuffer( birdSound );
