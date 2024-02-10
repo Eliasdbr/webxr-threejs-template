@@ -8,26 +8,27 @@ import Player from "./core/Player";
 import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
 import TextureManager from "./core/TextureManager";
+import AudioManager from "./core/AudioManager";
 
 // VR Pickable objects
 const pickRoot = new THREE.Object3D();
 GameScene.instance.addToWorld(pickRoot);
 
-GameScene.instance.onAudioInit = (audioListener) => {
+// Setup sound effects
+
+
+GameScene.instance.onAudioInit = async (audioListener) => {
 	// Sound loader
-	const birdSound = new THREE.PositionalAudio( audioListener );
-	const audioLoader = new THREE.AudioLoader();
-	audioLoader.load( './assets/snd/ambience/birds-isaiah658.ogg', 
-		( buffer ) => {
-			birdSound.setBuffer( buffer );
-			birdSound.setRefDistance( 5 );
-			birdSound.setVolume(0.5);
-			birdSound.position.set(-4, 2.5, -4);
-			birdSound.loop = true;
-			birdSound.play();
-			GameScene.instance.addToWorld(birdSound);
-		}
-	);
+	const birdSoundEmitter = new THREE.PositionalAudio( audioListener );
+	const birdSound = await AudioManager.use_audio('ambience/birds-isaiah658.ogg');
+	birdSoundEmitter.setBuffer( birdSound );
+	birdSoundEmitter.setRefDistance( 5 );
+	birdSoundEmitter.setVolume(0.5);
+	birdSoundEmitter.position.set(-4, 2.5, -4);
+	birdSoundEmitter.loop = true;
+	birdSoundEmitter.play();
+	GameScene.instance.addToWorld(birdSoundEmitter);
+
 }
 
 // VR Pointer
