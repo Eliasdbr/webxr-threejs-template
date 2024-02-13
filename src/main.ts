@@ -201,19 +201,13 @@ GameScene.instance.load()
 // })
 
 // TEMP: Testing the Entity.destroy() method.
-setTimeout(() => {
-	cube.destroy();
-}, 5000);
+// setTimeout(() => {
+// 	cube.destroy();
+// }, 5000);
 
 // Main Loop
 GameScene.instance.update = function(time) {
 	let seconds = time * 0.001;	// converts it to seconds
-
-	// Player's input and movement
-	player.update();
-
-	// Update cube logic
-	cube.update();
 
 	// Rotates the cube
 	pickHelper.update(pickRoot, seconds);

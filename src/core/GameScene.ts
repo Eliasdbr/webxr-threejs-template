@@ -133,6 +133,10 @@ class GameScene {
 
 	private _internalUpdate(time: number) {
 		this._phys_world.fixedStep();
+		// Updates its entities
+		for (let e in this._entities) {
+			this._entities[e].update();
+		}
 		// Update physics' debug rendering if enabled
 		if (this._phys_dbg && this.debug_show_collisions) this._phys_dbg.update();
 		this.update(time);
@@ -140,7 +144,7 @@ class GameScene {
 
 	/** Update method. Runs every frame */
 	public update = (_time: number) => {
-
+		
 	}
 
 	/** Excecutes once the audio has initialized */

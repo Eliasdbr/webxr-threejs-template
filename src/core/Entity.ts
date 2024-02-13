@@ -63,7 +63,9 @@ class Entity {
 	}
 
 	private physics_update() {
-		if (this._collision_shape) {
+		if (this._collision_shape 
+			&& this._collision_shape.type === CANNON.Body.DYNAMIC
+		) {
 			const transformed_pos = new THREE.Vector3(
 				this._collision_shape.position.x,
 				this._collision_shape.position.y,
