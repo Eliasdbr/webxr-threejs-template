@@ -7,7 +7,6 @@ import GameScene from "./core/GameScene";
 import Player from "./core/Player";
 import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
-// import TextureManager from "./core/TextureManager";
 import AudioManager from "./core/AudioManager";
 import WorldBuilder from "./world_builder/WorldBuilder";
 
@@ -60,43 +59,6 @@ const cube = new Entity(new THREE.Vector3(1, 1, -1.5));
 cube.collision = cubeCollision;
 cube.mesh = cubeMesh;
 
-// // Plane structure
-// const planeMesh = new THREE.Mesh(
-// 	new THREE.PlaneGeometry(1000, 1000),
-// 	new THREE.MeshPhongMaterial({
-// 		color: 0x80C000,
-// 		flatShading: true,
-// 	})
-// );
-// planeMesh.rotation.x = Math.PI / -2.0;
-// planeMesh.receiveShadow = true;
-
-// // Plane collision
-// const planeCollision = new CANNON.Body({
-// 	type: CANNON.Body.STATIC,
-// 	material: new CANNON.Material({
-// 		friction: 0.5,
-// 	}),
-// 	shape: new CANNON.Plane(),
-// });
-// planeCollision.quaternion.setFromEuler(-Math.PI / 2.0, 0, 0);
-// // Plane Entity
-// const plane = new Entity(new THREE.Vector3(0,0,0));
-// plane.collision = planeCollision;
-// plane.mesh = planeMesh;
-
-// // Grass Texture for the plane
-// planeMesh.visible = false;	// Hides the plane until the grass texture loads
-
-// const grasstexture = await TextureManager.use_texture("cartoon_grass.jpeg");
-// grasstexture.colorSpace = THREE.SRGBColorSpace;
-// grasstexture.repeat.set(5, 5);
-// grasstexture.wrapS = THREE.RepeatWrapping;
-// grasstexture.wrapT = THREE.RepeatWrapping;
-
-// planeMesh.material.map = grasstexture;
-// planeMesh.visible = true;
-
 // Sun light
 const sunColor = 0xFFFFFF;
 const sunIntensity = 1;
@@ -111,25 +73,6 @@ const skyColor = 0xccebff;
 const groundColor = 0xacfc7e;
 const skyIntensity = 1;
 const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
-
-// Skybox
-// const skytexture = await TextureManager.use_texture("sky4.jpg");
-// skytexture.mapping = THREE.EquirectangularReflectionMapping;
-// skytexture.colorSpace = THREE.SRGBColorSpace;
-// GameScene.instance.background = skytexture;
-
-// Tree model
-// const tree_model = new Entity(new THREE.Vector3(-4, -0.2, -4));
-// tree_model.model_name = "Low_Poly_Tree_GLTF.glb";
-// tree_model.scale = 0.075;
-// tree_model.rotation = new THREE.Vector3(Math.PI/2, 0, 0);
-// GameScene.instance.addEntity(tree_model);
-
-// Barrel model
-// const barrel_model = new Entity(new THREE.Vector3(-4, 0, 4));
-// barrel_model.model_name = "detail_barrel.glb";
-// barrel_model.scale = 4.0;
-// GameScene.instance.addEntity(barrel_model);
 
 // Controller Model
 const controller_model = await ModelManager.use_model("controller.gltf");
@@ -182,26 +125,18 @@ pickRoot.add(textPlane);
 GameScene.instance.addToWorld(sunlight);
 GameScene.instance.addToWorld(sunlight.target);
 GameScene.instance.addToWorld(skyLight);
-// GameScene.instance.addEntity(plane);
 GameScene.instance.addEntity(player);
 GameScene.instance.addEntity(cube);
 
 // Main scene
 await WorldBuilder.loadLevel("test_level.json");
 
-// window.addEventListener("keydown", (event) => {
-// 	event.key === "Space";
-// })
 
-// TEMP: Testing the Entity.destroy() method.
-// setTimeout(() => {
-// 	cube.destroy();
-// }, 5000);
 
 // Main Loop
 GameScene.instance.update = function(time) {
 	let seconds = time * 0.001;	// converts it to seconds
 
-	// Rotates the cube
+	// Updates the pickHelper
 	pickHelper.update(pickRoot, seconds);
 };
