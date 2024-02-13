@@ -13,6 +13,20 @@ export type Vec2 = {
 }
 
 /**
+ * 
+ */
+export type BackgroundType =
+	""
+
+/**
+ * Background options
+ */
+export type BackgroundOptions = {
+	type: TextureMapping,
+	filename: string,
+}
+
+/**
  * Texture Mapping modes.
  */
 export type TextureMapping =
@@ -175,6 +189,8 @@ export type MeshList = Array<MeshOptions>;
  * Here lies all the info to make a level.
  */
 export type LevelInfo = {
+	background: BackgroundOptions,
+
 	textures: TextureDict,
 	materials: MaterialDict,
 	geometries: GeometryDict,

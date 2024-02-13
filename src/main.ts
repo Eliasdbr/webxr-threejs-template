@@ -7,7 +7,7 @@ import GameScene from "./core/GameScene";
 import Player from "./core/Player";
 import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
-import TextureManager from "./core/TextureManager";
+// import TextureManager from "./core/TextureManager";
 import AudioManager from "./core/AudioManager";
 import WorldBuilder from "./world_builder/WorldBuilder";
 
@@ -113,10 +113,10 @@ const skyIntensity = 1;
 const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 
 // Skybox
-const skytexture = await TextureManager.use_texture("sky4.jpg");
-skytexture.mapping = THREE.EquirectangularReflectionMapping;
-skytexture.colorSpace = THREE.SRGBColorSpace;
-GameScene.instance.background = skytexture;
+// const skytexture = await TextureManager.use_texture("sky4.jpg");
+// skytexture.mapping = THREE.EquirectangularReflectionMapping;
+// skytexture.colorSpace = THREE.SRGBColorSpace;
+// GameScene.instance.background = skytexture;
 
 // Tree model
 const tree_model = new Entity(new THREE.Vector3(-4, -0.2, -4));

@@ -1,4 +1,9 @@
 {
+	"background": {
+		"type": "equirectangular_reflection",
+		"filename": "sky4.jpg"
+	},
+
 	"textures": {
 		"grass": {
 			"filename": "cartoon_grass.jpeg",

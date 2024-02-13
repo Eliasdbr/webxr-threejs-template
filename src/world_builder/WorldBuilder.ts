@@ -2,6 +2,7 @@ import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import {
 	LevelInfo,
+	TextureMapping,
 	TextureRepeatMapping,
 } from "./WorldBuilderTypes.ts";
 import TextureManager from "../core/TextureManager.ts";
@@ -32,6 +33,20 @@ export default class WorldBuilder {
 	> = {};
 	private static _meshes: Record<string, THREE.Mesh> = {};
 
+	private static async _loadBackground() {
+		const TEXTURE_MAPPING: Record<TextureMapping, THREE.AnyMapping> = {
+			"uv": THREE.UVMapping,
+			"cube_reflection": THREE.CubeReflectionMapping,
+			"equirectangular_reflection": THREE.EquirectangularReflectionMapping,
+		};
+
+		const background = this._level_info.background;
+		let new_bg = await TextureManager.use_texture(background.filename);
+		new_bg.colorSpace = THREE.SRGBColorSpace;
+		new_bg.mapping = TEXTURE_MAPPING[background.type];
+		GameScene.instance.background = new_bg;
+	}
+
 	private static async _loadTextures() {
 		const REPEAT_MAPPING: Record<TextureRepeatMapping, THREE.Wrapping> = {
 			"repeat": THREE.RepeatWrapping,
@@ -39,7 +54,7 @@ export default class WorldBuilder {
 			"mirrored_repeat": THREE.MirroredRepeatWrapping,
 		};
 
-		const textures =  this._level_info.textures;
+		const textures = this._level_info.textures;
 		for (let t in textures) {
 			const tex = textures[t];
 			let new_texture = await TextureManager.use_texture(tex.filename);
@@ -299,6 +314,7 @@ export default class WorldBuilder {
 		let res = await fetch(this._LEVELS_PATH + filename);
 		this._level_info = await res.json();
 
+		await this._loadBackground();
 		await this._loadTextures();
 		this._setupMaterials();
 		this._setupGeometries();
