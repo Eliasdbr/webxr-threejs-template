@@ -119,11 +119,11 @@ const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 // GameScene.instance.background = skytexture;
 
 // Tree model
-const tree_model = new Entity(new THREE.Vector3(-4, -0.2, -4));
-tree_model.model_name = "Low_Poly_Tree_GLTF.glb";
-tree_model.scale = 0.075;
-tree_model.rotation = new THREE.Vector3(Math.PI/2, 0, 0);
-GameScene.instance.addEntity(tree_model);
+// const tree_model = new Entity(new THREE.Vector3(-4, -0.2, -4));
+// tree_model.model_name = "Low_Poly_Tree_GLTF.glb";
+// tree_model.scale = 0.075;
+// tree_model.rotation = new THREE.Vector3(Math.PI/2, 0, 0);
+// GameScene.instance.addEntity(tree_model);
 
 // Barrel model
 const barrel_model = new Entity(new THREE.Vector3(-4, 0, 4));

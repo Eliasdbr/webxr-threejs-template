@@ -1,49 +1,66 @@
 {
+
 	"background": {
 		"type": "equirectangular_reflection",
 		"filename": "sky4.jpg"
 	},
 
+
+
+	"models": {
+		"mdl_tree": {
+			"filename": "Low_Poly_Tree_GLTF.glb",
+			"scale": 0.075
+		}
+	},
+
 	"textures": {
-		"grass": {
+		"txt_grass": {
 			"filename": "cartoon_grass.jpeg",
 			"repeat": {"x": 5, "y": 5},
 			"wrapS": "repeat",
 			"wrapT": "repeat"
 		}
 	},
+
+
+
 	"materials": {
-		"pink": {
+		"mtr_pink": {
 			"type": "phong",
 			"map": null,
 			"color": "#FFAAFF",
 			"flatShading": true
 		},
-		"grass": {
+		"mtr_grass": {
 			"type": "lambert",
-			"map": "grass",
+			"map": "txt_grass",
 			"color": "#80C000",
 			"flatShading": true
 		}
 	},
+
 	"geometries": {
-		"ground": {
+		"gmt_ground": {
 			"type": "plane",
 			"width": 10,
 			"height": 10
 		},
-		"cube": {
+		"gmt_cube": {
 			"type": "box",
 			"width": 0.5,
 			"height": 0.5,
 			"depth": 0.5
 		}
 	},
+
+
+
 	"world_geometry": [
 		{
 			"meshName": "ground_plane",
-			"geometry": "ground",
-			"material": "grass",
+			"geometry": "gmt_ground",
+			"material": "mtr_grass",
 			"position": {"x": 0, "y": 0, "z": 0},
 			"rotation": {"x": -1.57079632679, "y": 0, "z": 0},
 			"collision": {
@@ -53,8 +70,8 @@
 		},
 		{
 			"meshName": "pinkCube",
-			"geometry": "cube",
-			"material": "pink",
+			"geometry": "gmt_cube",
+			"material": "mtr_pink",
 			"position": {"x": 0, "y": 2, "z": -5},
 			"rotation": {"x": -0.785398163397, "y": -0.785398163397, "z": 0},
 			"collision": {
@@ -62,5 +79,19 @@
 			},
 			"castShadow": true
 		}
+	],
+
+	"entity_list": [
+		{
+			"entName": "ent_model_tree",
+			"origin": {"x": -4, "y": -0.1, "z": -4},
+			"rotation": {"x": 1.57079632679, "y": 0, "z": 0},
+			"model": "mdl_tree",
+			"collision": {
+				"boundaries": {"x": 0.5, "y": 1.5, "z": 0.5},
+				"offset": {"x": 0.25, "y": 1.6, "z": 0.25}
+			}
+		}
 	]
+
 }

@@ -134,8 +134,18 @@ export type GeometryOptions = {
  * Collision options. Sets the collisions for the world mesh
  */
 export type CollisionOptions = {
-	/** If true, copies shape and info from the mesh geometry */
+	/** 
+	 * If true, copies shape and info from the mesh geometry.
+	 * 
+	 * If parent is an entity, this is ignored
+	 */
 	copyFromGeometry?: boolean,
+	/** 
+	 * Sets the collision box offset.
+	 * 
+	 * If copyFromGeometry == true, this is ignored.
+	 */
+	offset?: Vec3,
 	/** 
 	 * Sets the collision box boundaries.
 	 * 
@@ -184,16 +194,54 @@ export type MeshOptions = {
 export type MeshList = Array<MeshOptions>;
 
 /**
+ * Model options.
+ * Properties that define the model resource
+ */
+export type ModelOptions = {
+	filename: string,
+	scale: number,
+}
+
+/**
+ * Contains a dictionary of the Models
+ */
+export type ModelDict = Record<string, ModelOptions>;
+
+/**
+ * Entity Options.
+ * The info needed to create an entity
+ */
+export type EntityOptions = {
+	entName: string,
+	origin: Vec3,
+	rotation: Vec3,
+	model?: keyof ModelDict,
+	collision?: CollisionOptions,
+};
+
+/**
+ * Contains a dictionary of the Entities
+ */
+export type EntityList = Array<EntityOptions>;
+
+/**
  * Level data.
  * 
  * Here lies all the info to make a level.
  */
 export type LevelInfo = {
+	// Level Properties
 	background: BackgroundOptions,
 
+	// Level External Resources
 	textures: TextureDict,
+	models: ModelDict,
+
+	// Level Internal Resources
 	materials: MaterialDict,
 	geometries: GeometryDict,
 
+	// Level Geometry
 	world_geometry: MeshList,
+	entity_list: EntityList,
 }

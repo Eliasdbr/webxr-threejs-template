@@ -8,6 +8,7 @@ import {
 import TextureManager from "../core/TextureManager.ts";
 import GameScene from "../core/GameScene.ts";
 import Entity from "../core/Entity.ts";
+import ModelManager from "../core/ModelManager.ts";
 
 export default class WorldBuilder {
 	private static _LEVELS_PATH = "./levels/";
@@ -15,6 +16,7 @@ export default class WorldBuilder {
 	private static _level_info: LevelInfo;
 
 	private static _textures: Record<string,THREE.Texture> = {};
+	private static _models: Record<string,THREE.Object3D> = {}
 	private static _materials: Record<
 		string,
 		THREE.MeshBasicMaterial
@@ -67,6 +69,15 @@ export default class WorldBuilder {
 			new_texture.wrapT = REPEAT_MAPPING[tex.wrapT || "clamp_to_edge"];
 
 			this._textures[t] = new_texture;
+		}
+	}
+
+	private static async _loadModels() {
+		const models = this._level_info.models;
+		for (let m in models) {
+			const mdl = models[m];
+			let new_model = await ModelManager.use_model(mdl.filename);
+			this._models[m] = new_model;
 		}
 	}
 
@@ -289,9 +300,9 @@ export default class WorldBuilder {
 				});
 
 				coll.position.set(
-					msh.position.x,
-					msh.position.y,
-					msh.position.z,
+					msh.position.x + (msh.collision.offset?.x || 0),
+					msh.position.y + (msh.collision.offset?.y || 0),
+					msh.position.z + (msh.collision.offset?.z || 0),
 				);
 
 				coll.quaternion.setFromEuler(
@@ -310,14 +321,59 @@ export default class WorldBuilder {
 		}
 	}
 
+	private static async initEntities() {
+		const entities = this._level_info.entity_list;
+		for (let e in entities) {
+			const ent = entities[e];
+
+			const new_entity = new Entity(new THREE.Vector3(
+				ent.origin.x,
+				ent.origin.y,
+				ent.origin.z,
+			));
+
+			if (ent.collision && ent.collision.boundaries) {
+				const shp = new CANNON.Box(new CANNON.Vec3(
+					ent.collision.boundaries.x,
+					ent.collision.boundaries.y,
+					ent.collision.boundaries.z,
+				));
+
+				const coll = new CANNON.Body({
+					shape: shp,
+				});
+
+				coll.position.set(
+					ent.origin.x + (ent.collision.offset?.x || 0),
+					ent.origin.y + (ent.collision.offset?.y || 0),
+					ent.origin.z + (ent.collision.offset?.z || 0),
+				);
+
+				new_entity.collision = coll;
+			}
+
+			new_entity.model_name = this._level_info.models[ent.model || ""].filename;
+			new_entity.scale = this._level_info.models[ent.model || ""].scale;
+			new_entity.rotation = new THREE.Vector3(
+				ent.rotation.x,
+				ent.rotation.y,
+				ent.rotation.z,
+			);
+
+			GameScene.instance.addEntity(new_entity);
+		}
+	}
+
 	public static async loadLevel(filename: string) {
 		let res = await fetch(this._LEVELS_PATH + filename);
 		this._level_info = await res.json();
 
 		await this._loadBackground();
 		await this._loadTextures();
+		await this._loadModels();
 		this._setupMaterials();
 		this._setupGeometries();
 		this._initMeshes();
+		await this.initEntities();
 	}
 }
