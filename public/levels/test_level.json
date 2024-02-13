@@ -1,0 +1,61 @@
+{
+	"textures": {
+		"grass": {
+			"filename": "cartoon_grass.jpeg",
+			"repeat": {"x": 5, "y": 5},
+			"wrapS": "repeat",
+			"wrapT": "repeat"
+		}
+	},
+	"materials": {
+		"pink": {
+			"type": "phong",
+			"map": null,
+			"color": "#FFAAFF",
+			"flatShading": true
+		},
+		"grass": {
+			"type": "lambert",
+			"map": "grass",
+			"color": "#80C000",
+			"flatShading": true
+		}
+	},
+	"geometries": {
+		"ground": {
+			"type": "plane",
+			"width": 10,
+			"height": 10
+		},
+		"cube": {
+			"type": "box",
+			"width": 0.5,
+			"height": 0.5,
+			"depth": 0.5
+		}
+	},
+	"world_geometry": [
+		{
+			"meshName": "ground_plane",
+			"geometry": "ground",
+			"material": "grass",
+			"position": {"x": 0, "y": 0, "z": 0},
+			"rotation": {"x": -1.57079632679, "y": 0, "z": 0},
+			"collision": {
+				"copyFromGeometry": true
+			},
+			"receiveShadow": true
+		},
+		{
+			"meshName": "pinkCube",
+			"geometry": "cube",
+			"material": "pink",
+			"position": {"x": 0, "y": 2, "z": -5},
+			"rotation": {"x": -0.785398163397, "y": -0.785398163397, "z": 0},
+			"collision": {
+				"copyFromGeometry": true
+			},
+			"castShadow": true
+		}
+	]
+}

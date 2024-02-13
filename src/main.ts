@@ -9,12 +9,13 @@ import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
 import TextureManager from "./core/TextureManager";
 import AudioManager from "./core/AudioManager";
+import WorldBuilder from "./world_builder/WorldBuilder";
 
 // VR Pickable objects
 const pickRoot = new THREE.Object3D();
 GameScene.instance.addToWorld(pickRoot);
 
-// GameScene.instance.debug_show_collisions = false;
+GameScene.instance.debug_show_collisions = true;
 
 // Setup sound effects
 GameScene.instance.onAudioInit = async (audioListener) => {
@@ -38,7 +39,7 @@ const controllerToSelection = new Map();
 // Cube structure
 const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const material = new THREE.MeshPhongMaterial({ 
-	color: 0xFFFFFF,
+	color: 0xAAFFFF,
 	flatShading: true,
 });
 const cubeMesh = new THREE.Mesh(geometry, material);
@@ -59,42 +60,42 @@ const cube = new Entity(new THREE.Vector3(1, 1, -1.5));
 cube.collision = cubeCollision;
 cube.mesh = cubeMesh;
 
-// Plane structure
-const planeMesh = new THREE.Mesh(
-	new THREE.PlaneGeometry(10, 10),
-	new THREE.MeshPhongMaterial({
-		color: 0x80C000,
-		flatShading: true,
-	})
-);
-planeMesh.rotation.x = Math.PI / -2.0;
-planeMesh.receiveShadow = true;
+// // Plane structure
+// const planeMesh = new THREE.Mesh(
+// 	new THREE.PlaneGeometry(1000, 1000),
+// 	new THREE.MeshPhongMaterial({
+// 		color: 0x80C000,
+// 		flatShading: true,
+// 	})
+// );
+// planeMesh.rotation.x = Math.PI / -2.0;
+// planeMesh.receiveShadow = true;
 
-// Plane collision
-const planeCollision = new CANNON.Body({
-	type: CANNON.Body.STATIC,
-	material: new CANNON.Material({
-		friction: 0.5,
-	}),
-	shape: new CANNON.Plane(),
-});
-planeCollision.quaternion.setFromEuler(-Math.PI / 2.0, 0, 0);
-// Plane Entity
-const plane = new Entity(new THREE.Vector3(0,0,0));
-plane.collision = planeCollision;
-plane.mesh = planeMesh;
+// // Plane collision
+// const planeCollision = new CANNON.Body({
+// 	type: CANNON.Body.STATIC,
+// 	material: new CANNON.Material({
+// 		friction: 0.5,
+// 	}),
+// 	shape: new CANNON.Plane(),
+// });
+// planeCollision.quaternion.setFromEuler(-Math.PI / 2.0, 0, 0);
+// // Plane Entity
+// const plane = new Entity(new THREE.Vector3(0,0,0));
+// plane.collision = planeCollision;
+// plane.mesh = planeMesh;
 
-// Grass Texture for the plane
-planeMesh.visible = false;	// Hides the plane until the grass texture loads
+// // Grass Texture for the plane
+// planeMesh.visible = false;	// Hides the plane until the grass texture loads
 
-const grasstexture = await TextureManager.use_texture("cartoon_grass.jpeg");
-grasstexture.colorSpace = THREE.SRGBColorSpace;
-grasstexture.repeat.set(5, 5);
-grasstexture.wrapS = THREE.RepeatWrapping;
-grasstexture.wrapT = THREE.RepeatWrapping;
+// const grasstexture = await TextureManager.use_texture("cartoon_grass.jpeg");
+// grasstexture.colorSpace = THREE.SRGBColorSpace;
+// grasstexture.repeat.set(5, 5);
+// grasstexture.wrapS = THREE.RepeatWrapping;
+// grasstexture.wrapT = THREE.RepeatWrapping;
 
-planeMesh.material.map = grasstexture;
-planeMesh.visible = true;
+// planeMesh.material.map = grasstexture;
+// planeMesh.visible = true;
 
 // Sun light
 const sunColor = 0xFFFFFF;
@@ -187,16 +188,17 @@ pickRoot.add(textPlane);
 GameScene.instance.addToWorld(sunlight);
 GameScene.instance.addToWorld(sunlight.target);
 GameScene.instance.addToWorld(skyLight);
-GameScene.instance.addEntity(plane);
+// GameScene.instance.addEntity(plane);
 GameScene.instance.addEntity(player);
 GameScene.instance.addEntity(cube);
 
 // Main scene
+await WorldBuilder.loadLevel("test_level.json");
 GameScene.instance.load()
 
-window.addEventListener("keydown", (event) => {
-	event.key === "Space";
-})
+// window.addEventListener("keydown", (event) => {
+// 	event.key === "Space";
+// })
 
 // TEMP: Testing the Entity.destroy() method.
 setTimeout(() => {
