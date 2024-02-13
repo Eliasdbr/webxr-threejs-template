@@ -126,16 +126,10 @@ const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 // GameScene.instance.addEntity(tree_model);
 
 // Barrel model
-const barrel_model = new Entity(new THREE.Vector3(-4, 0, 4));
-barrel_model.model_name = "detail_barrel.glb";
-barrel_model.scale = 4.0;
-GameScene.instance.addEntity(barrel_model);
-
-// Wall Model
-const wall_model = new Entity(new THREE.Vector3(4, 0, 4));
-wall_model.model_name = "wall_gate.glb";
-wall_model.scale = 4.0;
-GameScene.instance.addEntity(wall_model);
+// const barrel_model = new Entity(new THREE.Vector3(-4, 0, 4));
+// barrel_model.model_name = "detail_barrel.glb";
+// barrel_model.scale = 4.0;
+// GameScene.instance.addEntity(barrel_model);
 
 // Controller Model
 const controller_model = await ModelManager.use_model("controller.gltf");
@@ -194,7 +188,6 @@ GameScene.instance.addEntity(cube);
 
 // Main scene
 await WorldBuilder.loadLevel("test_level.json");
-GameScene.instance.load()
 
 // window.addEventListener("keydown", (event) => {
 // 	event.key === "Space";

@@ -371,9 +371,12 @@ export default class WorldBuilder {
 		await this._loadBackground();
 		await this._loadTextures();
 		await this._loadModels();
+
 		this._setupMaterials();
 		this._setupGeometries();
 		this._initMeshes();
 		await this.initEntities();
+
+		await GameScene.instance.load();
 	}
 }

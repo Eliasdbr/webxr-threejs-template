@@ -11,6 +11,10 @@
 		"mdl_tree": {
 			"filename": "Low_Poly_Tree_GLTF.glb",
 			"scale": 0.075
+		},
+		"mdl_barrel": {
+			"filename": "detail_barrel.glb",
+			"scale": 4.0
 		}
 	},
 
@@ -72,7 +76,7 @@
 			"meshName": "pinkCube",
 			"geometry": "gmt_cube",
 			"material": "mtr_pink",
-			"position": {"x": 0, "y": 2, "z": -5},
+			"position": {"x": 0, "y": 1, "z": 4},
 			"rotation": {"x": -0.785398163397, "y": -0.785398163397, "z": 0},
 			"collision": {
 				"copyFromGeometry": true
@@ -90,6 +94,16 @@
 			"collision": {
 				"boundaries": {"x": 0.5, "y": 1.5, "z": 0.5},
 				"offset": {"x": 0.25, "y": 1.6, "z": 0.25}
+			}
+		},
+		{
+			"entName": "ent_model_barrel",
+			"origin": {"x": -4, "y": 0, "z": 4},
+			"rotation": {"x": 0, "y": 0, "z": 0},
+			"model": "mdl_barrel",
+			"collision": {
+				"boundaries": {"x": 0.35, "y": 0.75, "z": 0.35},
+				"offset": {"x": 0, "y": 0.75, "z": 0}
 			}
 		}
 	]
