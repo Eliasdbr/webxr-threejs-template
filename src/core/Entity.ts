@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import ModelManager from "./ModelManager";
+import GameScene from "./GameScene";
+import * as ConvUtils from "../utils/conversions";
 
 class Entity {
 
@@ -9,6 +11,14 @@ class Entity {
 	protected _scale: number = 1.0;
 	protected _rotation: THREE.Vector3;
 	protected _collision_shape: CANNON.Body | null = null;
+
+	private _linear_velocity: THREE.Vector3 = new THREE.Vector3(0,0,0);
+	private _angular_velocity: THREE.Vector3 = new THREE.Vector3(0,0,0);
+
+	/**
+	 * Entity name. An optional name for being easier to find.
+	 */
+	public ent_name: string = "";
 	
 	/**
 	 * Uses the ModelManager class to load a model providing a filename.
@@ -16,6 +26,11 @@ class Entity {
 	 * Will search the model at "assets/mdl/" in the "public" folder.
 	 * */
 	public model_name: string = "";
+
+	/**
+	 * Whether this entity updates normally or while paused.
+	 */
+	public process_mode: "NORMAL" | "PAUSE" = "NORMAL";
 
 	/** Mesh getter */
 	public get mesh() {
@@ -40,9 +55,40 @@ class Entity {
 		this._scale = value;
 	}
 
-	/** Rotation setter. Write Only */
+	/** Rotation setter. */
 	public set rotation(value: THREE.Vector3) {
 		this._rotation = value;
+	}
+	public get rotation() {
+		return this._rotation;
+	}
+
+	public set linear_velocity(value: THREE.Vector3) {
+		this._linear_velocity = value;
+		if (this._collision_shape) {
+			this._collision_shape.velocity.set(
+				value.x,
+				value.y,
+				value.z
+			);
+		}
+	}
+	public get linear_velocity() {
+		return this._linear_velocity;
+	}
+
+	public set angular_velocity(value: THREE.Vector3) {
+		this._angular_velocity = value;
+		if (this._collision_shape) {
+			this._collision_shape.angularVelocity.set(
+				value.x,
+				value.y,
+				value.z
+			);
+		}
+	}
+	public get angular_velocity() {
+		return this._angular_velocity;
 	}
 
 	constructor(position: THREE.Vector3) {
@@ -66,11 +112,19 @@ class Entity {
 		if (this._collision_shape 
 			&& this._collision_shape.type === CANNON.Body.DYNAMIC
 		) {
+			this._linear_velocity = ConvUtils.cannonVec3toThreeVec3(
+				this._collision_shape.velocity
+			);
+			this._angular_velocity = ConvUtils.cannonVec3toThreeVec3(
+				this._collision_shape.angularVelocity
+			);
+
 			const transformed_pos = new THREE.Vector3(
 				this._collision_shape.position.x,
 				this._collision_shape.position.y,
 				this._collision_shape.position.z,
 			);
+
 			const transformed_rot = new THREE.Quaternion(
 				this._collision_shape.quaternion.x,
 				this._collision_shape.quaternion.y,
@@ -83,6 +137,14 @@ class Entity {
 
 			this._mesh?.position.copy(transformed_pos);
 			this._mesh?.quaternion.copy(transformed_rot);
+		}
+		else if (this._mesh) {
+			let new_rot = new THREE.Euler(
+				this._mesh.rotation.x + this._angular_velocity.x,
+				this._mesh.rotation.y + this._angular_velocity.y,
+				this._mesh.rotation.z + this._angular_velocity.z,
+			);
+			this._mesh.rotation.copy(new_rot);
 		}
 	}
 
@@ -112,6 +174,11 @@ class Entity {
 	}
 
 	public update() {
+		// Only updates if the game process matches the entity process mode.
+		if (
+			GameScene.instance.is_paused 
+			=== (this.process_mode === "NORMAL") 
+		) return;
 		this.physics_update();
 	}
 

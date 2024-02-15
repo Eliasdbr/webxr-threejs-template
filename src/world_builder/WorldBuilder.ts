@@ -244,6 +244,7 @@ export default class WorldBuilder {
 			new_mesh.visible = true;
 
 			ent.mesh = new_mesh;
+			ent.ent_name = msh.meshName;
 
 			if (msh.collision) {
 				let new_shape: CANNON.Shape;
@@ -352,6 +353,8 @@ export default class WorldBuilder {
 				new_entity.collision = coll;
 			}
 
+			new_entity.process_mode = ent.processMode;
+			new_entity.ent_name = ent.entName;
 			new_entity.model_name = this._level_info.models[ent.model || ""].filename;
 			new_entity.scale = this._level_info.models[ent.model || ""].scale;
 			new_entity.rotation = new THREE.Vector3(

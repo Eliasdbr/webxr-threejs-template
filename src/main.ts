@@ -58,6 +58,7 @@ cubeCollision.quaternion.setFromEuler(-Math.PI / 4.0, -Math.PI / 4.0, 0);
 const cube = new Entity(new THREE.Vector3(1, 1, -1.5));
 cube.collision = cubeCollision;
 cube.mesh = cubeMesh;
+// cube.process_mode = "PAUSE";
 
 // Sun light
 const sunColor = 0xFFFFFF;
@@ -131,6 +132,23 @@ GameScene.instance.addEntity(cube);
 // Main scene
 await WorldBuilder.loadLevel("test_level.json");
 
+// Events
+// TEST: Game Pause
+addEventListener("keydown", event => {
+	event.preventDefault();
+	if (event.key === " ") {
+		let prevState = GameScene.instance.is_paused;
+		GameScene.instance.is_paused = !prevState;
+		console.log("PAUSED:", !prevState);
+	}
+})
+
+let test_rotation = new THREE.Vector3(0, 0.01, 0);
+
+let pink_cube = GameScene.instance.findEntityByName("pinkCube");
+if (pink_cube) {
+	pink_cube.angular_velocity = test_rotation;
+}
 
 
 // Main Loop

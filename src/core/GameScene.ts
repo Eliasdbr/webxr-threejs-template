@@ -40,6 +40,8 @@ class GameScene {
 
 	public debug_show_collisions: boolean = false;
 
+	public is_paused: boolean = false;
+
 	public set background(texture: Texture | null) {
 		if (texture) {
 			this._background = texture;
@@ -121,6 +123,11 @@ class GameScene {
 		return this._entities[ent_id] ? this._entities[ent_id] : null;
 	}
 
+	public findEntityByName = (keyword: string) => {
+		let foundEntity = this._entities.find(ent => ent.ent_name === keyword);
+		return foundEntity || null;
+	}
+
 	/** Load method. Loads everything for the game */
 	public load = async () => {
 		// Load entities for the game
@@ -132,7 +139,7 @@ class GameScene {
 	}
 
 	private _internalUpdate(time: number) {
-		this._phys_world.fixedStep();
+		if (!this.is_paused) this._phys_world.fixedStep();
 		// Updates its entities
 		for (let e in this._entities) {
 			this._entities[e].update();

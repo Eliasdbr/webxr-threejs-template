@@ -213,6 +213,7 @@ export type ModelDict = Record<string, ModelOptions>;
  */
 export type EntityOptions = {
 	entName: string,
+	processMode: "NORMAL" | "PAUSE",
 	origin: Vec3,
 	rotation: Vec3,
 	model?: keyof ModelDict,
