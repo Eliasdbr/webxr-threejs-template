@@ -14,7 +14,7 @@ import WorldBuilder from "./world_builder/WorldBuilder";
 const pickRoot = new THREE.Object3D();
 GameScene.instance.addToWorld(pickRoot);
 
-GameScene.instance.debug_show_collisions = true;
+GameScene.instance.debug_show_collisions = false;
 
 // Setup sound effects
 GameScene.instance.onAudioInit = async (audioListener) => {

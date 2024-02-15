@@ -10,6 +10,8 @@ class Player extends Entity {
 
 	private _controller: THREE.XRTargetRaySpace | null = null;
 
+	public can_move = true;
+
 	constructor (origin: THREE.Vector3) {
 		super(origin);
 
@@ -90,7 +92,11 @@ class Player extends Entity {
 		let gamepad = this.updateInput();
 
 		// Player Movement based on input
-		if (gamepad) this.moveBasedOnInput(gamepad);
+		if (
+			!GameScene.instance.is_paused
+			&& this.can_move 
+			&& gamepad
+		) this.moveBasedOnInput(gamepad);
 	}
 }
 
