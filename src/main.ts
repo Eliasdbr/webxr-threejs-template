@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 
-import ControllerPickHelper from "./core/ControllerPickHelper";
+// import ControllerPickHelper from "./core/ControllerPickHelper";
 import TextPlane from "./core/TextPlane";
 import GameScene from "./core/GameScene";
 import Player from "./core/Player";
@@ -9,10 +9,11 @@ import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
 import AudioManager from "./core/AudioManager";
 import WorldBuilder from "./world_builder/WorldBuilder";
+import ControllerManager from "./core/ControllerManager";
 
 // VR Pickable objects
-const pickRoot = new THREE.Object3D();
-GameScene.instance.addToWorld(pickRoot);
+const draggables = new THREE.Object3D();
+GameScene.instance.addToWorld(draggables);
 
 GameScene.instance.debug_show_collisions = false;
 
@@ -29,11 +30,6 @@ GameScene.instance.onAudioInit = async (audioListener) => {
 	GameScene.instance.addToWorld(birdSoundEmitter);
 
 }
-
-// VR Pointer
-const pickHelper = new ControllerPickHelper(GameScene.instance.renderer);
-// Move objects when selected
-const controllerToSelection = new Map();
 
 // Cube structure
 const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
@@ -58,7 +54,6 @@ cubeCollision.quaternion.setFromEuler(-Math.PI / 4.0, -Math.PI / 4.0, 0);
 const cube = new Entity(new THREE.Vector3(1, 1, -1.5));
 cube.collision = cubeCollision;
 cube.mesh = cubeMesh;
-// cube.process_mode = "PAUSE";
 
 // Sun light
 const sunColor = 0xFFFFFF;
@@ -79,7 +74,7 @@ const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 const controller_model = await ModelManager.use_model("controller.gltf");
 controller_model.position.set(0, 0.01, 0.02);
 controller_model.rotation.set(Math.PI/2, 0, Math.PI/2);
-pickHelper.setControllerModel(controller_model);
+// pickHelper.setControllerModel(controller_model);
 
 
 // Text plane
@@ -89,40 +84,21 @@ const textPlane = new TextPlane(
 );
 textPlane.rotateX(Math.PI / -8);
 
-
-pickHelper.addEventListener('selectstart', (event) => {
-	//@ts-ignore | I'm tired of type-gymnastics
-  const {controller, selectedObject} = event;
-  const existingSelection = controllerToSelection.get(controller);
-  if (!existingSelection) {
-    controllerToSelection.set(controller, {
-      object: selectedObject,
-      parent: selectedObject.parent,
-    });
-    controller.attach(selectedObject);
-		if (selectedObject.name === "TextPlane") textPlane.setText("It changed!");
-  }
-});
- 
-pickHelper.addEventListener('selectend', (event) => {
-	//@ts-ignore | I'm tired of type-gymnastics
-  const {controller} = event;
-  const selection = controllerToSelection.get(controller);
-  if (selection) {
-    controllerToSelection.delete(controller);
-    selection.parent.attach(selection.object);
-		if (selection.object.name === "TextPlane") textPlane.setText("Hello World!");
-  }
-});
+// Primary Controller custom model
+const glove_model = await ModelManager.use_model("Glove.glb");
+glove_model.rotateY(Math.PI);
+glove_model.rotateZ(Math.PI/2);
+glove_model.scale.set(0.25,0.25,0.25);
+ControllerManager.instance.setCustomModel(0, glove_model);
 
 // Player Entity
 const player = new Player(new THREE.Vector3(0, 0, 0));
 
-player.setController(pickHelper.controllers[0].controller);
+player.setController(ControllerManager.instance.controllers[0]);
 player.appendCamera(GameScene.instance.camera);
 
 // Adds objects to the main scene
-pickRoot.add(textPlane);
+draggables.add(textPlane);
 GameScene.instance.addToWorld(sunlight);
 GameScene.instance.addToWorld(sunlight.target);
 GameScene.instance.addToWorld(skyLight);
@@ -133,15 +109,19 @@ GameScene.instance.addEntity(cube);
 await WorldBuilder.loadLevel("test_level.json");
 
 // Events
+
 // TEST: Game Pause
-addEventListener("keydown", event => {
+addEventListener("hashchange", event => {
 	event.preventDefault();
-	if (event.key === " ") {
+	// if (event.key === " ") {
 		let prevState = GameScene.instance.is_paused;
 		GameScene.instance.is_paused = !prevState;
 		console.log("PAUSED:", !prevState);
-	}
-})
+		ControllerManager.control_mode = prevState
+			? "DEFAULT"
+			: "UI";
+	// }
+});
 
 let test_rotation = new THREE.Vector3(0, 0.01, 0);
 
@@ -150,11 +130,28 @@ if (pink_cube) {
 	pink_cube.angular_velocity = test_rotation;
 }
 
+let firstTime = true;
 
 // Main Loop
 GameScene.instance.update = function(time) {
 	let seconds = time * 0.001;	// converts it to seconds
+	
+	let gamepad = ControllerManager.updateInput()
+	
+	if (gamepad) {
+		textPlane.setText(gamepad.buttons.map(
+			(b,i) => `B${i}: ${b.pressed ? "1" : "0"}`
+		).join(", "));
+	}
 
-	// Updates the pickHelper
-	pickHelper.update(pickRoot, seconds);
+	const session = GameScene.instance.renderer.xr.getSession()
+	if (session && firstTime) {
+		console.log("session found!");
+		session.addEventListener("end", event => {
+			event.preventDefault();
+			console.log("Attempted to exit immersive mode. cancelable?", event.cancelable);
+			textPlane.setText("Attempted to exit immersive mode.");
+		});
+		firstTime = false;
+	}
 };

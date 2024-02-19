@@ -4,9 +4,25 @@ export default class TextPlane extends THREE.Object3D {
 	text: string;
 	plane: THREE.Mesh;
 	texture: THREE.Texture;
-	width: number;
-	height: number;
+	private _width: number;
+	private _height: number;
 
+	public set width(value: number) {
+		this._width = value
+		this.plane.scale.set(value, this._height, 1);
+	}
+	public get width() {
+		return this._width;
+	}
+
+	public set height(value: number) {
+		this._height = value
+		this.plane.scale.set(this._width, value, 1);
+	}
+	public get height() {
+		return this._height;
+	}
+	
 	constructor(
 		position: THREE.Vector3 = new THREE.Vector3(0, 0, 0),
 		text: string = "Sample Text",
@@ -35,8 +51,8 @@ export default class TextPlane extends THREE.Object3D {
 			position.z,
 		)
 
-		this.width = width;
-		this.height = height;
+		this._width = width;
+		this._height = height;
 
 		this.setText(text);
 
@@ -50,8 +66,8 @@ export default class TextPlane extends THREE.Object3D {
 		var text = this.text;
 		var bitmap = document.createElement('canvas');
 		var g = bitmap.getContext('2d');
-		bitmap.width = this.width*1024;
-		bitmap.height = this.height*1024;
+		bitmap.width = this._width*1024;
+		bitmap.height = this._height*1024;
 		if (g) {
 			g.fillStyle = 'black';
 			g.fillRect(0, 0, bitmap.width, bitmap.height);

@@ -3,6 +3,7 @@ import * as CANNON from "cannon-es";
 
 import GameScene from "./GameScene";
 import Entity from "./Entity";
+import ControllerManager from "./ControllerManager";
 
 class Player extends Entity {
 
@@ -53,18 +54,6 @@ class Player extends Entity {
 		this._mesh?.add(child);
 	}
 
-	private updateInput() {
-		// Axis movement (touchpad)
-		let inputSources = GameScene.instance.renderer.xr.getSession()?.inputSources;
-		if (inputSources && inputSources.length) {
-			for (let source of inputSources) {
-				let gamepad = source.gamepad;
-				if (gamepad) return gamepad;
-			}
-		}
-		return null;
-	}
-
 	private moveBasedOnInput(input: Gamepad) {
 		if (this._collision_shape && this._controller) {
 
@@ -89,7 +78,7 @@ class Player extends Entity {
 		super.update();
 
 		// Player Input
-		let gamepad = this.updateInput();
+		let gamepad = ControllerManager.updateInput();
 
 		// Player Movement based on input
 		if (
