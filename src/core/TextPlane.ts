@@ -1,11 +1,62 @@
 import * as THREE from "three";
 
 export default class TextPlane extends THREE.Object3D {
-	text: string;
+	text: string[];
 	plane: THREE.Mesh;
 	texture: THREE.Texture;
+
+	resolution: number = 1024;
+	
+	padding: number = 128;
+
+	fontSize: number = 56;
+
+	maxCharsPerLine: number = 30;
+	maxLines: number = 5;
+
+	lineHeight: number = this.fontSize * 1.5;	// in pixels
+
 	private _width: number;
 	private _height: number;
+
+	private _wrapText = (text: string) => {
+		let lines: string[] = [];
+		let lineCount = 0;
+	
+		let words = text.split("\ ");
+	
+		while (words.length > 0 && lineCount < this.maxLines) {
+			// Generate a line, word by word, taking into account each line's length
+			let currentLine = "";
+
+			// Checks if the addition of the next word excedes the max chars per line.
+			// If it doesn't, add that word to the current line
+			let keepLooping = true;
+
+			while (keepLooping) {
+
+				let nextWord = words[0];
+
+				if (
+					nextWord &&
+					currentLine.length + nextWord.length <= this.maxCharsPerLine
+				) {
+					currentLine += nextWord + " ";
+					words.shift();
+					if (nextWord.includes("\n")) break;
+				}
+				else {
+					keepLooping = false;
+				}
+			}
+			
+			lines.push(currentLine);
+			lineCount++;
+
+		}
+
+		return lines;
+	}
 
 	public set width(value: number) {
 		this._width = value
@@ -39,7 +90,7 @@ export default class TextPlane extends THREE.Object3D {
 			})
 		);
 
-		this.text = text;
+		this.text = this._wrapText(text);;
 		this.texture = this.generateTexture();
 		//@ts-ignore
 		this.plane.material.map = this.texture;
@@ -54,6 +105,14 @@ export default class TextPlane extends THREE.Object3D {
 		this._width = width;
 		this._height = height;
 
+		this.maxCharsPerLine = Math.trunc( 
+			(width*this.resolution - this.padding) / (this.fontSize*0.6) 
+		);
+
+		this.maxLines = Math.trunc( 
+			(height*this.resolution - this.padding) / this.lineHeight - 1
+		);
+
 		this.setText(text);
 
 		this.add(this.plane);
@@ -63,21 +122,39 @@ export default class TextPlane extends THREE.Object3D {
 
 	private generateTexture() {
 		//create image
-		var text = this.text;
+
 		var bitmap = document.createElement('canvas');
 		var g = bitmap.getContext('2d');
 		bitmap.width = this._width*1024;
 		bitmap.height = this._height*1024;
 		if (g) {
 			g.fillStyle = 'black';
-			g.fillRect(0, 0, bitmap.width, bitmap.height);
+			g.roundRect(0, 0, bitmap.width, bitmap.height, this._height*this.padding);
+			g.fill();
 
-			g.font = '32px monospace';
+			g.font = `${this.fontSize}px monospace`;
 
 			g.fillStyle = 'white';
-			g.textBaseline = 'middle';
-			g.textAlign = 'center';
-			g.fillText(text || "Sample Text", bitmap.width/2, bitmap.height/2);
+			g.textBaseline = 'top';
+			g.textAlign = 'left';
+
+			this.text.forEach((_el, ln) => {
+				g?.fillText(
+					this.text[ln], 
+					this.padding/2, this.padding/2 + ln*this.lineHeight, 
+					bitmap.width-this.padding
+				);
+			});
+
+			g.fillStyle = 'gray';
+			g.textBaseline = 'bottom';
+			g.textAlign = 'right';
+			g.fillText(
+				"< Click to close >",
+				bitmap.width-this.padding/2,		// x position
+				bitmap.height-this.padding/2,	// y position
+				bitmap.width-this.padding			// max width
+			)
 	
 		}
 		// canvas contents will be used for a texture
@@ -98,8 +175,24 @@ export default class TextPlane extends THREE.Object3D {
 	}
 
 	setText(text: string) {
-		this.text = text;
+		this.text = this._wrapText(text);
 		this.generateTexture()
 	}
+
+	// TODO: Hover animation
+	// hoverAnimation() {
+	// 	this.plane.animations.push(
+	// 		new THREE.AnimationClip(
+	// 			"anim_hover",
+	// 			500,
+	// 			[
+	// 				new THREE.VectorKeyframeTrack("scale",
+	// 					[0, 250, 500], [1.0, 1.1, 1.0],
+	// 					THREE.InterpolateSmooth
+	// 				)
+	// 			]
+	// 		)
+	// 	)
+	// }
 
 }

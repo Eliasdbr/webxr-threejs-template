@@ -70,17 +70,11 @@ const groundColor = 0xacfc7e;
 const skyIntensity = 1;
 const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 
-// Controller Model
-const controller_model = await ModelManager.use_model("controller.gltf");
-controller_model.position.set(0, 0.01, 0.02);
-controller_model.rotation.set(Math.PI/2, 0, Math.PI/2);
-// pickHelper.setControllerModel(controller_model);
-
-
 // Text plane
 const textPlane = new TextPlane(
 	new THREE.Vector3(0,1.25,-1),
-	"Hello World!",
+	"Hello World!\n \n This is a test for a large test!!! Testingggg teeeeestingggg. The quick brown fox jumps over the lazy dog.\n \n Veniam vitae autem alias qui in architecto. Commodi illum sit voluptatem aperiam repellat autem.",
+	1.5, 1.0
 );
 textPlane.rotateX(Math.PI / -8);
 
@@ -108,21 +102,6 @@ GameScene.instance.addEntity(cube);
 // Main scene
 await WorldBuilder.loadLevel("test_level.json");
 
-// Events
-
-// TEST: Game Pause
-addEventListener("hashchange", event => {
-	event.preventDefault();
-	// if (event.key === " ") {
-		let prevState = GameScene.instance.is_paused;
-		GameScene.instance.is_paused = !prevState;
-		console.log("PAUSED:", !prevState);
-		ControllerManager.control_mode = prevState
-			? "DEFAULT"
-			: "UI";
-	// }
-});
-
 let test_rotation = new THREE.Vector3(0, 0.01, 0);
 
 let pink_cube = GameScene.instance.findEntityByName("pinkCube");
@@ -133,25 +112,24 @@ if (pink_cube) {
 let firstTime = true;
 
 // Main Loop
-GameScene.instance.update = function(time) {
-	let seconds = time * 0.001;	// converts it to seconds
+GameScene.instance.update = function(_time) {	
+	// let gamepad = ControllerManager.updateInput()
 	
-	let gamepad = ControllerManager.updateInput()
-	
-	if (gamepad) {
-		textPlane.setText(gamepad.buttons.map(
-			(b,i) => `B${i}: ${b.pressed ? "1" : "0"}`
-		).join(", "));
-	}
+	// if (gamepad) {
+	// 	textPlane.setText(gamepad.buttons.map(
+	// 		(b,i) => `B${i}: ${b.pressed ? "1" : "0"}`
+	// 	).join(", "));
+	// }
 
-	const session = GameScene.instance.renderer.xr.getSession()
-	if (session && firstTime) {
-		console.log("session found!");
-		session.addEventListener("end", event => {
-			event.preventDefault();
-			console.log("Attempted to exit immersive mode. cancelable?", event.cancelable);
-			textPlane.setText("Attempted to exit immersive mode.");
-		});
-		firstTime = false;
-	}
+	// const session = GameScene.instance.renderer.xr.getSession()
+	// if (session && firstTime) {
+
+	// 	session.addEventListener("end", _event => {
+	// 		GameScene.instance.is_paused = true;
+	// 		console.log("IS PAUSED!");
+	// 		ControllerManager.control_mode = "UI";
+	// 	});
+
+	// 	firstTime = false;
+	// }
 };
