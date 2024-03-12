@@ -109,7 +109,7 @@ if (pink_cube) {
 	pink_cube.angular_velocity = test_rotation;
 }
 
-let firstTime = true;
+// let firstTime = true;
 
 // Main Loop
 GameScene.instance.update = function(_time) {	

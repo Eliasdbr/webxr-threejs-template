@@ -12,7 +12,7 @@ import * as CANNON from "cannon-es";
 import CannonDebugger from "cannon-es-debugger";
 
 
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+// import { VRButton } from 'three/addons/webxr/VRButton.js';
 import Entity from "./Entity";
 
 class GameScene {
@@ -34,13 +34,84 @@ class GameScene {
 	private _height: number;
 	private _scene = new Scene();
 
+	private loadUI = async () => {
+		const html= await (await fetch("./ui/menu.html")).text();
+	
+		let newElement = document.createElement("div");
+		let linkElement = document.createElement("link");
+	
+		newElement.style.width = "100vw";
+		newElement.style.height = "100vh";
+		newElement.style.position= "fixed";
+		newElement.style.top= "0";
+		newElement.style.left= "0";
+		newElement.innerHTML = html;
+	
+		linkElement.setAttribute("rel","stylesheet");
+		linkElement.setAttribute("type","text/css");
+		linkElement.setAttribute("href","./ui/menu.css");
+	
+		document.head.appendChild(linkElement);
+		document.body.appendChild(newElement);
+
+		let playButton = document.getElementById("button-play");
+
+		if (playButton) {
+			playButton.onclick = async (_event) => {
+
+				if (!this.session) {
+
+					this.is_paused = false;
+
+					this.session = await navigator.xr?.requestSession(
+						"immersive-vr",
+						{ 
+							optionalFeatures: [
+								'unbounded',
+								'local-floor',
+								'bounded-floor',
+								'layers',
+							],
+						}
+					) || null;
+
+					if (this.session) {
+
+						const onSessionEnded = () => {
+
+							this.session?.removeEventListener("end", onSessionEnded );
+							newElement.style.display = "flex";
+							this.session = null;
+
+							this.is_paused = true;
+
+						}
+
+						await this.session.requestReferenceSpace("local-floor");
+
+						this.session.addEventListener("end", onSessionEnded);
+
+						await this.renderer.xr.setSession(this.session);
+
+						newElement.style.display = "none";
+					}
+
+				}
+
+			};
+
+		}
+	}
+	
+
 	public renderer: WebGLRenderer;
+	public session: XRSession | null;
 	public camera: PerspectiveCamera;
 	public audio_listener: AudioListener | null;
 
 	public debug_show_collisions: boolean = false;
 
-	public is_paused: boolean = false;
+	public is_paused: boolean = true;
 
 	public set background(texture: Texture | null) {
 		if (texture) {
@@ -99,8 +170,11 @@ class GameScene {
 		}
 
 		// VR STUFF
-		const vr_button = VRButton.createButton( this.renderer );
-		document.body.appendChild( vr_button );
+		// const vr_button = VRButton.createButton( this.renderer );
+		// document.body.appendChild( vr_button );
+		this.session = null;
+
+		this.loadUI();
 		this.renderer.xr.enabled = true;
 
 		// GAME LOOP
