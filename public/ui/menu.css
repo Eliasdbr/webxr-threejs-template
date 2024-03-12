@@ -41,7 +41,7 @@
 }
 
 button {
-	background-color: hsla(214, 100%, 33%, 0.941);
+	background-color: hsla(214, 100%, 30%, 0.941);
 
 	border: 1px none black;
 	border-radius: 16px;
@@ -60,14 +60,14 @@ button {
 }
 
 button:hover {
-	background-color: hsla(214, 65%, 44%, 0.941);
+	background-color: hsla(214, 65%, 40%, 0.941);
 	/* transform: translate(-4px, -4px); */
 	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.33);
 }
 
 button:active {
-	background-color: hsla(214, 100%, 27%, 0.941);
+	background-color: hsla(214, 100%, 20%, 0.941);
 	/* transform: translate(0px, 0px); */
 	box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.33);
-	color: lightgray;
+	color: hsl(0, 0%, 70%);
 }

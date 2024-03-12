@@ -55,6 +55,7 @@ class GameScene {
 		document.body.appendChild(newElement);
 
 		let playButton = document.getElementById("button-play");
+		let menuTitle = document.getElementById("menu-title");
 
 		if (playButton) {
 			playButton.onclick = async (_event) => {
@@ -92,6 +93,10 @@ class GameScene {
 						this.session.addEventListener("end", onSessionEnded);
 
 						await this.renderer.xr.setSession(this.session);
+
+						playButton!!.innerText = "Resume";
+
+						if (menuTitle) menuTitle.innerText = "Pause Menu";
 
 						newElement.style.display = "none";
 					}

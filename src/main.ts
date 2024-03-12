@@ -109,6 +109,17 @@ if (pink_cube) {
 	pink_cube.angular_velocity = test_rotation;
 }
 
+window.addEventListener( "resize", onWindowResize, false );
+
+function onWindowResize(){
+
+  GameScene.instance.camera.aspect = window.innerWidth / window.innerHeight;
+  GameScene.instance.camera.updateProjectionMatrix();
+
+  GameScene.instance.renderer.setSize( window.innerWidth, window.innerHeight );
+
+}
+
 // let firstTime = true;
 
 // Main Loop
