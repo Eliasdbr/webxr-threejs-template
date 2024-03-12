@@ -10,6 +10,11 @@ import ModelManager from "./core/ModelManager";
 import AudioManager from "./core/AudioManager";
 import WorldBuilder from "./world_builder/WorldBuilder";
 import ControllerManager from "./core/ControllerManager";
+import UIManager from "./core/UIManager";
+
+// Off-VR Menu
+UIManager.instance.loadUI();
+
 
 // VR Pickable objects
 const draggables = new THREE.Object3D();
