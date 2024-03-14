@@ -129,7 +129,9 @@ export default class TextPlane extends THREE.Object3D {
 		bitmap.height = this._height*1024;
 		if (g) {
 			g.fillStyle = 'black';
-			g.roundRect(0, 0, bitmap.width, bitmap.height, this._height*this.padding);
+			// roundRect() doesn't work on Oculus GO's Browser
+			// g.roundRect(0, 0, bitmap.width, bitmap.height, this._height*this.padding);
+			g.fillRect(0, 0, bitmap.width, bitmap.height);
 			g.fill();
 
 			g.font = `${this.fontSize}px monospace`;
