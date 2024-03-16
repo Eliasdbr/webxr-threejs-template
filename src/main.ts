@@ -18,8 +18,8 @@ UIManager.instance.loadUI();
 
 
 // VR Pickable objects
-const draggables = new THREE.Object3D();
-GameScene.instance.addToWorld(draggables);
+const uiElements = new THREE.Object3D();
+GameScene.instance.addToWorld(uiElements);
 
 GameScene.instance.debug_show_collisions = false;
 
@@ -78,8 +78,13 @@ const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 
 // Text plane
 const textPlane = new TextPlane(
-	new THREE.Vector3(0,1.25,-1),
-	"Hello World!\n \n This is a test for a large test!!! Testingggg teeeeestingggg. The quick brown fox jumps over the lazy dog.\n \n Veniam vitae autem alias qui in architecto. Commodi illum sit voluptatem aperiam repellat autem.",
+	new THREE.Vector3(0, 1.25, -1),
+	[
+		"Hello World!\n \n This is a text box that can have multiple pages.",
+		"This, for example, is another page.",
+		"It can be used as a guide for a tutorial.",
+		"Have fun!"
+	],
 	1.5, 1.0,
 );
 textPlane.rotateX(Math.PI / -8);
@@ -98,7 +103,7 @@ player.setController(ControllerManager.instance.controllers[0]);
 player.appendCamera(GameScene.instance.camera);
 
 // Adds objects to the main scene
-draggables.add(textPlane);
+uiElements.add(textPlane);
 GameScene.instance.addToWorld(sunlight);
 GameScene.instance.addToWorld(sunlight.target);
 GameScene.instance.addToWorld(skyLight);
@@ -146,8 +151,8 @@ GameScene.instance.update = function(time) {
 
 		// console.log("uiPointer?", !!uiPointer0);
 
-		uiPointer0?.castRay([draggables]);
-		uiPointer1?.castRay([draggables]);
+		uiPointer0?.castRay([uiElements]);
+		uiPointer1?.castRay([uiElements]);
 
 		prevTime = time;
 	}

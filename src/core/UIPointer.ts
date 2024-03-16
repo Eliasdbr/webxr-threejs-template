@@ -50,6 +50,17 @@ class UIPointer extends THREE.Object3D {
 	/** Updates the list of all the intersected objects by the raycaster. */
 	public castRay(objectsToCheck: THREE.Object3D[]) {
 
+		// Before casting a new ray, excecutes its onHover method
+		for (let int of this._intersectedObjects) {
+			// @ts-ignore
+			int.parent?.onHoverEnd();
+		}
+
+		this._renderLine.visible = false;
+		this._renderLine.scale.set(1, 1, this.range);
+
+		this._intersectedObjects = [];
+
 		let tempMatrix = new THREE.Matrix4();
 
 		// Sets raycasters world position and direction
@@ -57,7 +68,9 @@ class UIPointer extends THREE.Object3D {
 		this._raycaster.ray.origin.setFromMatrixPosition(this.matrixWorld);
 		this._raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-		let intersections = this._raycaster.intersectObjects(objectsToCheck, true);
+		let intersections = this._raycaster
+			.intersectObjects(objectsToCheck, true)
+			.filter(int => int.object.name.includes("UISelectable"));
 
 		if (intersections.length >= 1) {
 			
@@ -71,29 +84,13 @@ class UIPointer extends THREE.Object3D {
 
 			// console.log("Intersected objects:", this._intersectedObjects);
 
-			for (let int of this._intersectedObjects) {
-				if (int.name.includes("UISelectable")) {
-					// @ts-ignore
-					int.parent?.onHover();
-				}
+			let closestObject = this._intersectedObjects[0];
+
+			if (closestObject) {
+				// @ts-ignore
+				closestObject.parent?.onHover();
 			}
-
-		}
-		else {
-
-			// Before cleaning the intersected objects list, do this
-			for (let int of this._intersectedObjects) {
-				if (int.name.includes("UISelectable")) {
-					// @ts-ignore
-					int.parent?.onHoverEnd();
-				}
-			}
-
-			this._renderLine.visible = false;
-			this._renderLine.scale.set(1, 1, this.range);
-
-			this._intersectedObjects = [];
-
+			
 		}
 
 	}
@@ -104,14 +101,11 @@ class UIPointer extends THREE.Object3D {
 	public select() {
 
 		// console.log("Intersected objects:", this._intersectedObjects);
+		let closestObject = this._intersectedObjects[0];
 
-
-		for (let int of this._intersectedObjects) {
-			if (int.name.includes("UISelectable")) {
-				// @ts-ignore
-				int.parent?.onSelect();
-				int.parent = null;
-			}
+		if (closestObject) {
+			// @ts-ignore
+			closestObject.parent?.onSelect();
 		}
 
 	}

@@ -23,6 +23,8 @@ export default class TextPlane extends THREE.Object3D {
 	private _width: number;
 	private _height: number;
 
+	private _pages: string[];
+
 	private _wrapText = (text: string) => {
 		let lines: string[] = [];
 		let lineCount = 0;
@@ -80,13 +82,17 @@ export default class TextPlane extends THREE.Object3D {
 	
 	constructor(
 		position: THREE.Vector3 = new THREE.Vector3(0, 0, 0),
-		text: string = "Sample Text",
+		text: string[] = ["Sample Text"],
 		width: number = 1,
 		height: number = 0.5,
 		textColor: THREE.Color = new THREE.Color(0xFFFFFF),
 		backgroundColor: THREE.Color = new THREE.Color(0x000000),
 	) {
 		super();
+
+		this.text = text;
+
+		this.texture = new THREE.Texture();
 
 		this.plane = new THREE.Mesh(
 			new THREE.PlaneGeometry(width, height),
@@ -96,11 +102,11 @@ export default class TextPlane extends THREE.Object3D {
 			})
 		);
 
-		this.text = this._wrapText(text);
+		this._pages = text;
+		
 		this.textColor = textColor;
 		this.backgroundColor = backgroundColor;
 
-		this.texture = this.generateTexture();
 		//@ts-ignore
 		this.plane.material.map = this.texture;
 		this.plane.name = "UISelectable:TextPlane";
@@ -122,7 +128,7 @@ export default class TextPlane extends THREE.Object3D {
 			(height*this.resolution - this.padding) / this.lineHeight - 1
 		);
 
-		this.setText(text);
+		this._nextPage();
 
 		this.add(this.plane);
 
@@ -163,7 +169,7 @@ export default class TextPlane extends THREE.Object3D {
 			g.textBaseline = 'bottom';
 			g.textAlign = 'right';
 			g.fillText(
-				"< Click to close >",
+				this._pages.length >= 1 ? "Click to continue ->" : "< Click to close >",
 				bitmap.width-this.padding/2,		// x position
 				bitmap.height-this.padding/2,	// y position
 				bitmap.width-this.padding			// max width
@@ -183,13 +189,24 @@ export default class TextPlane extends THREE.Object3D {
 		return texture;
 	}
 
-	setPosition(pos: THREE.Vector3) {
-		this.position.set(pos.x, pos.y, pos.z);
+	private _nextPage() {
+
+		if (this._pages.length >= 1) {
+
+			let nextPage = this._pages.shift()!!;
+
+			this.text = this._wrapText(nextPage);
+			this.generateTexture();
+		}
+		else {
+			this.destroy();
+		}
+
 	}
 
-	setText(text: string) {
-		this.text = this._wrapText(text);
-		this.generateTexture()
+
+	setPosition(pos: THREE.Vector3) {
+		this.position.set(pos.x, pos.y, pos.z);
 	}
 
 	onHover() {
@@ -211,12 +228,10 @@ export default class TextPlane extends THREE.Object3D {
 	}
 
 	onSelect() {
-		this.destroy();
+		this._nextPage()
 	}
 
 	destroy() {
-
-		console.log("Text Plane Destroyed!");
 
 		if (Array.isArray(this.plane.material)) {
 			for (let mat of this.plane.material) {
