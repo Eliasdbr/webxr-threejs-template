@@ -4,6 +4,7 @@ import {
 	XRControllerModel,
 	XRControllerModelFactory
 } from "three/examples/jsm/Addons.js";
+import UIPointer from "./UIPointer";
 
 /**
  * Controller Manager.
@@ -15,11 +16,7 @@ class ControllerManager {
 
 	private static _instance = new ControllerManager();
 	private static _control_mode: "DEFAULT" | "UI" = "DEFAULT";
-	private _controller_models: XRControllerModel[] = [
-
-	];
-	private _raycast_lines: THREE.Object3D[] = [];
-
+	private _controller_models: XRControllerModel[] = [];
 
 	public static get instance() {
 		return this._instance;
@@ -45,9 +42,6 @@ class ControllerManager {
 		// UI Controller models
 		this.instance._controller_models.forEach( 
 			mdl => mdl.visible = value === "UI"
-		);
-		this.instance._raycast_lines.forEach(
-			line => line.visible = value === "UI"
 		);
 
 		this.custom_models.forEach(
@@ -77,41 +71,42 @@ class ControllerManager {
 			this.controllers[c].add(model);
 
 			//
-			// Raycaster Line
+			// UI Raycaster
 			//
-			const line_geometry = new THREE.BufferGeometry();
-			const positions = [
-				0, 0, 0,
-				0, 0, -1,
-			];
-			line_geometry.setAttribute(
-				'position',
-				new THREE.Float32BufferAttribute( positions, 3 )
-			);
-			line_geometry.scale(1, 1, 10);
-
-			const line_material = new THREE.LineBasicMaterial({
-				color: 0xFFFFFF,
-			});
-
-			const raycast_line = new THREE.Line(line_geometry, line_material);
-			raycast_line.visible = ControllerManager._control_mode === "UI";
-			this._raycast_lines[c] = raycast_line;
-			this.controllers[c].add(raycast_line);
+			let uiRaycaster = new UIPointer(5);
+			uiRaycaster.name = "UIPOINTER_" + c;
+			this.controllers[c].add(uiRaycaster);
 
 			//
 			// Trigger events
 			//
+			
+			// Trigger just pressed
 			this.controllers[c].addEventListener(
 				"select",
 				event => {
-					if (ControllerManager._control_mode === "UI") {
-						// Cast a ray for the UI elemens
-					}
-					else {
-						// Fires the onTrigger method
-						this.onTrigger(c, event)
-					}
+					// Checks for selectable UI elements 
+					uiRaycaster.select();
+					// Fires the onTrigger method
+					this.onTrigger(c, event)
+				}
+			);
+
+			// Hold Trigger
+			this.controllers[c].addEventListener(
+				"selectstart",
+				_event => {
+						// Changes the UIPointer color
+						uiRaycaster.selectStart();
+				}
+			);
+
+			// Release Trigger
+			this.controllers[c].addEventListener(
+				"selectend",
+				_event => {
+						// Changes the UIPointer color
+						uiRaycaster.selectEnd();
 				}
 			);
 		}
@@ -128,7 +123,7 @@ class ControllerManager {
 			data: XRInputSource;
 		} & THREE.Event<"select", THREE.XRTargetRaySpace>
 	) {
-		
+
 	}
 
 	/**

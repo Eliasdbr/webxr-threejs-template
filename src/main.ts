@@ -11,6 +11,7 @@ import AudioManager from "./core/AudioManager";
 import WorldBuilder from "./world_builder/WorldBuilder";
 import ControllerManager from "./core/ControllerManager";
 import UIManager from "./core/UIManager";
+import UIPointer from "./core/UIPointer";
 
 // Off-VR Menu
 UIManager.instance.loadUI();
@@ -79,7 +80,7 @@ const skyLight = new THREE.HemisphereLight(skyColor, groundColor, skyIntensity);
 const textPlane = new TextPlane(
 	new THREE.Vector3(0,1.25,-1),
 	"Hello World!\n \n This is a test for a large test!!! Testingggg teeeeestingggg. The quick brown fox jumps over the lazy dog.\n \n Veniam vitae autem alias qui in architecto. Commodi illum sit voluptatem aperiam repellat autem.",
-	1.5, 1.0
+	1.5, 1.0,
 );
 textPlane.rotateX(Math.PI / -8);
 
@@ -125,27 +126,30 @@ function onWindowResize(){
 
 }
 
-// let firstTime = true;
+let prevTime = 0;
 
 // Main Loop
-GameScene.instance.update = function(_time) {	
-	// let gamepad = ControllerManager.updateInput()
-	
-	// if (gamepad) {
-	// 	textPlane.setText(gamepad.buttons.map(
-	// 		(b,i) => `B${i}: ${b.pressed ? "1" : "0"}`
-	// 	).join(", "));
-	// }
+GameScene.instance.update = function(time) {
 
-	// const session = GameScene.instance.renderer.xr.getSession()
-	// if (session && firstTime) {
+	// Updates UIPointers raycasters, to be able to select UI Objects.
+	// but just update every 0.05 seconds
+	if (time > prevTime + 50) {
+		let uiPointer0 = ControllerManager
+			.instance
+			.controllers[0]
+			.getObjectByName("UIPOINTER_0") as UIPointer | undefined;
 
-	// 	session.addEventListener("end", _event => {
-	// 		GameScene.instance.is_paused = true;
-	// 		console.log("IS PAUSED!");
-	// 		ControllerManager.control_mode = "UI";
-	// 	});
+		let uiPointer1 = ControllerManager
+			.instance
+			.controllers[1]
+			.getObjectByName("UIPOINTER_1") as UIPointer | undefined;
 
-	// 	firstTime = false;
-	// }
+		// console.log("uiPointer?", !!uiPointer0);
+
+		uiPointer0?.castRay([draggables]);
+		uiPointer1?.castRay([draggables]);
+
+		prevTime = time;
+	}
+
 };

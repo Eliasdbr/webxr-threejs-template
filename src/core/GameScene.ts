@@ -118,6 +118,10 @@ class GameScene {
 		this._world.add(obj);
 	}
 
+	public removeFromWorld(obj: Object3D) {
+		this._world.remove(obj);
+	}
+
 	public addEntity = (ent: Entity) => {
 		return this._entities.push(ent);
 	}

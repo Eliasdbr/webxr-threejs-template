@@ -1,7 +1,11 @@
 import * as THREE from "three";
+import GameScene from "./GameScene";
 
 export default class TextPlane extends THREE.Object3D {
 	text: string[];
+	textColor: THREE.Color;
+	backgroundColor: THREE.Color;
+
 	plane: THREE.Mesh;
 	texture: THREE.Texture;
 
@@ -79,6 +83,8 @@ export default class TextPlane extends THREE.Object3D {
 		text: string = "Sample Text",
 		width: number = 1,
 		height: number = 0.5,
+		textColor: THREE.Color = new THREE.Color(0xFFFFFF),
+		backgroundColor: THREE.Color = new THREE.Color(0x000000),
 	) {
 		super();
 
@@ -90,11 +96,14 @@ export default class TextPlane extends THREE.Object3D {
 			})
 		);
 
-		this.text = this._wrapText(text);;
+		this.text = this._wrapText(text);
+		this.textColor = textColor;
+		this.backgroundColor = backgroundColor;
+
 		this.texture = this.generateTexture();
 		//@ts-ignore
 		this.plane.material.map = this.texture;
-		this.plane.name = "TextPlane";
+		this.plane.name = "UISelectable:TextPlane";
 
 		this.plane.position.set(
 			position.x,
@@ -128,7 +137,7 @@ export default class TextPlane extends THREE.Object3D {
 		bitmap.width = this._width*1024;
 		bitmap.height = this._height*1024;
 		if (g) {
-			g.fillStyle = 'black';
+			g.fillStyle = this.backgroundColor.getStyle();
 			// roundRect() doesn't work on Oculus GO's Browser
 			// g.roundRect(0, 0, bitmap.width, bitmap.height, this._height*this.padding);
 			g.fillRect(0, 0, bitmap.width, bitmap.height);
@@ -136,7 +145,7 @@ export default class TextPlane extends THREE.Object3D {
 
 			g.font = `${this.fontSize}px monospace`;
 
-			g.fillStyle = 'white';
+			g.fillStyle = this.textColor.getStyle();
 			g.textBaseline = 'top';
 			g.textAlign = 'left';
 
@@ -148,7 +157,9 @@ export default class TextPlane extends THREE.Object3D {
 				);
 			});
 
-			g.fillStyle = 'gray';
+			g.fillStyle = this.textColor
+				.multiply(new THREE.Color(0x808080))
+				.getStyle();
 			g.textBaseline = 'bottom';
 			g.textAlign = 'right';
 			g.fillText(
@@ -179,6 +190,50 @@ export default class TextPlane extends THREE.Object3D {
 	setText(text: string) {
 		this.text = this._wrapText(text);
 		this.generateTexture()
+	}
+
+	onHover() {
+		if (Array.isArray(this.plane.material)) {
+			this.plane.material[0].opacity = 1.0;
+		}
+		else {
+			this.plane.material.opacity = 1.0;
+		}
+	}
+
+	onHoverEnd() {
+		if (Array.isArray(this.plane.material)) {
+			this.plane.material[0].opacity = 0.75;
+		}
+		else {
+			this.plane.material.opacity = 0.75;
+		}
+	}
+
+	onSelect() {
+		this.destroy();
+	}
+
+	destroy() {
+
+		console.log("Text Plane Destroyed!");
+
+		if (Array.isArray(this.plane.material)) {
+			for (let mat of this.plane.material) {
+				mat.dispose();
+			}
+		}
+		else {
+			this.plane.material.dispose();
+		}
+
+		this.plane.geometry.dispose();
+
+
+		this.plane.removeFromParent();
+
+		GameScene.instance.removeFromWorld(this);
+
 	}
 
 	// TODO: Hover animation
