@@ -18,6 +18,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+
+		"types": [
+			"vite-plugin-terminal/client"
+		]
 		
   },
   "include": ["src"],

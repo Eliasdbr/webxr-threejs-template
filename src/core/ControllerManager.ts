@@ -1,4 +1,5 @@
 import * as THREE from "three";
+
 import GameScene from "./GameScene";
 import {
 	XRControllerModel,
@@ -6,12 +7,17 @@ import {
 } from "three/examples/jsm/Addons.js";
 import UIPointer from "./UIPointer";
 
+export enum MOVEMENT {
+	TELEPORT,
+	DASH,
+	FREE,
+}
+
 /**
  * Controller Manager.
  * 
  * Handles VR Controllers
  */
-
 class ControllerManager {
 
 	private static _instance = new ControllerManager();
@@ -50,11 +56,17 @@ class ControllerManager {
  
 	}
 
+	public static set movement_mode(_movement_type: MOVEMENT) {
+		// TODO: change transportation method.
+	} 
+
 	/**
 	 * Constructor
 	 */
 	constructor() {
 		const controllerModelFactory = new XRControllerModelFactory();
+
+		ControllerManager.movement_mode = MOVEMENT.FREE;
 
 		for (let c in this.controllers) {
 
@@ -123,7 +135,7 @@ class ControllerManager {
 			data: XRInputSource;
 		} & THREE.Event<"select", THREE.XRTargetRaySpace>
 	) {
-
+		// Empty for now
 	}
 
 	/**

@@ -1,15 +1,18 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
+import { terminal } from "virtual:terminal";
 
 import GameScene from "./GameScene";
 import Entity from "./Entity";
-import ControllerManager from "./ControllerManager";
+import ControllerManager, { MOVEMENT } from "./ControllerManager";
 
 class Player extends Entity {
 
 	private MOVEMENT_SPEED = 0.01;
 
 	private _controller: THREE.XRTargetRaySpace | null = null;
+
+	private _prevButtons: boolean[];
 
 	public can_move = true;
 
@@ -33,6 +36,12 @@ class Player extends Entity {
 			0.85	+ origin.y,
 			0.0		+ origin.z,
 		);
+
+		this._prevButtons = [
+			false,
+			false,
+			false,
+		];
 	}
 
 	public appendCamera(cam: THREE.PerspectiveCamera) {
@@ -57,17 +66,53 @@ class Player extends Entity {
 	private moveBasedOnInput(input: Gamepad) {
 		if (this._collision_shape && this._controller) {
 
-			const contr_quat = this._controller.getWorldQuaternion(new THREE.Quaternion());
+			let wasTouchpadButtonPressed = this._prevButtons[2];
 
-			const final_vector = new THREE.Vector3(
-				input.axes[0] * this.MOVEMENT_SPEED,
-				0,
-				input.axes[1] * this.MOVEMENT_SPEED * (input.axes[1] < 0 ? 2 : 1),
-			).applyQuaternion(contr_quat);
+			let isTouchpadButtonPressed = input.buttons[2].pressed;
+
+			// Checks if touchpad button is just pressed
+			if (
+				!wasTouchpadButtonPressed
+				&& isTouchpadButtonPressed
+			) terminal.log("Touchpad Pressed!");
+
+			// Checks if touchpad button is just released
+			if (
+				wasTouchpadButtonPressed
+				&& !isTouchpadButtonPressed
+			) terminal.log("Touchpad Released!");
+
+			// Movement types
+			switch(ControllerManager.movement_mode) {
+
+				// The player teleports to where its pointing.
+				case MOVEMENT.TELEPORT:
+					break;
+
+				// Like Teleport, but the player dashes to its destination.
+				case MOVEMENT.DASH:
+					break;
+
+				// The player moves depending on controller axis.
+				case MOVEMENT.FREE:
+				default:
+					const contr_quat = this._controller.getWorldQuaternion(new THREE.Quaternion());
+		
+					const final_vector = new THREE.Vector3(
+						input.axes[0] * this.MOVEMENT_SPEED,
+						0,
+						input.axes[1] * this.MOVEMENT_SPEED * (input.axes[1] < 0 ? 2 : 1),
+					).applyQuaternion(contr_quat);
+					
+					this._collision_shape.position.x += final_vector.x;
+		
+					this._collision_shape.position.z += final_vector.z;
 			
-			this._collision_shape.position.x += final_vector.x
+			}
 
-			this._collision_shape.position.z += final_vector.z
+
+			// Updates Touchpad Buttons
+			this._prevButtons[2] = input.buttons[2].pressed;
 
 		}
 	}
