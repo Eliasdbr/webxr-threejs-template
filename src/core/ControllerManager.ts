@@ -6,6 +6,7 @@ import {
 	XRControllerModelFactory
 } from "three/examples/jsm/Addons.js";
 import UIPointer from "./UIPointer";
+import ControllerTeleporter from "./ControllerTeleporter";
 
 export enum MOVEMENT {
 	TELEPORT,
@@ -56,9 +57,7 @@ class ControllerManager {
  
 	}
 
-	public static set movement_mode(_movement_type: MOVEMENT) {
-		// TODO: change transportation method.
-	} 
+	public static movement_mode: MOVEMENT;
 
 	/**
 	 * Constructor
@@ -88,6 +87,16 @@ class ControllerManager {
 			let uiRaycaster = new UIPointer(5);
 			uiRaycaster.name = "UIPOINTER_" + c;
 			this.controllers[c].add(uiRaycaster);
+
+			// 
+			// Teleport Helper
+			//
+			// Just for the first controller for now
+			if (c === "0") {
+				let controllerTeleporter = new ControllerTeleporter(5);
+				controllerTeleporter.name = "Teleporter:CTRL_" + c;
+				this.controllers[c].add(controllerTeleporter);
+			}
 
 			//
 			// Trigger events

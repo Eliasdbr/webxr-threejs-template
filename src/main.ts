@@ -9,9 +9,10 @@ import Entity from "./core/Entity";
 import ModelManager from "./core/ModelManager";
 import AudioManager from "./core/AudioManager";
 import WorldBuilder from "./world_builder/WorldBuilder";
-import ControllerManager from "./core/ControllerManager";
+import ControllerManager, { MOVEMENT } from "./core/ControllerManager";
 import UIManager from "./core/UIManager";
 import UIPointer from "./core/UIPointer";
+import ControllerTeleporter from "./core/ControllerTeleporter";
 
 // Off-VR Menu
 UIManager.instance.loadUI();
@@ -131,28 +132,33 @@ function onWindowResize(){
 
 }
 
+ControllerManager.movement_mode = MOVEMENT.TELEPORT;
+
 let prevTime = 0;
 
 // Main Loop
 GameScene.instance.update = function(time) {
 
-	// Updates UIPointers raycasters, to be able to select UI Objects.
-	// but just update every 0.05 seconds
+
 	if (time > prevTime + 50) {
+
+		// Updates UIPointers raycasters, to be able to select UI Objects.
+		// but just update every 0.05 seconds
 		let uiPointer0 = ControllerManager
 			.instance
 			.controllers[0]
 			.getObjectByName("UIPOINTER_0") as UIPointer | undefined;
 
-		let uiPointer1 = ControllerManager
-			.instance
-			.controllers[1]
-			.getObjectByName("UIPOINTER_1") as UIPointer | undefined;
+		// For Oculus GO, omit this controller
+		// let uiPointer1 = ControllerManager
+		// 	.instance
+		// 	.controllers[1]
+		// 	.getObjectByName("UIPOINTER_1") as UIPointer | undefined;
 
 		// console.log("uiPointer?", !!uiPointer0);
 
 		uiPointer0?.castRay([uiElements]);
-		uiPointer1?.castRay([uiElements]);
+		// uiPointer1?.castRay([uiElements]);
 
 		prevTime = time;
 	}

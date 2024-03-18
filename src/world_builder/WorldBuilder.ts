@@ -245,6 +245,7 @@ export default class WorldBuilder {
 
 			ent.mesh = new_mesh;
 			ent.ent_name = msh.meshName;
+			new_mesh.name = msh.meshName;
 
 			if (msh.collision) {
 				let new_shape: CANNON.Shape;

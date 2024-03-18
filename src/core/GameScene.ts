@@ -55,6 +55,10 @@ class GameScene {
 		return this._background;
 	}
 
+	public get scene() {
+		return this._scene;
+	}
+
 	private constructor() {
 
 		// --- SCREEN PROPERTIES ---

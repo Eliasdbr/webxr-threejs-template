@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
-import { terminal } from "virtual:terminal";
 
 import GameScene from "./GameScene";
 import Entity from "./Entity";
 import ControllerManager, { MOVEMENT } from "./ControllerManager";
+import ControllerTeleporter from "./ControllerTeleporter";
 
 class Player extends Entity {
 
@@ -70,23 +70,47 @@ class Player extends Entity {
 
 			let isTouchpadButtonPressed = input.buttons[2].pressed;
 
-			// Checks if touchpad button is just pressed
-			if (
-				!wasTouchpadButtonPressed
-				&& isTouchpadButtonPressed
-			) terminal.log("Touchpad Pressed!");
+			// // Checks if touchpad button is just pressed
+			// if (
+			// 	!wasTouchpadButtonPressed
+			// 	&& isTouchpadButtonPressed
+			// ) terminal.log("Touchpad Pressed!");
 
-			// Checks if touchpad button is just released
-			if (
-				wasTouchpadButtonPressed
-				&& !isTouchpadButtonPressed
-			) terminal.log("Touchpad Released!");
+			// // Checks if touchpad button is just released
+			// if (
+			// 	wasTouchpadButtonPressed
+			// 	&& !isTouchpadButtonPressed
+			// ) terminal.log("Touchpad Released!");
 
 			// Movement types
 			switch(ControllerManager.movement_mode) {
 
 				// The player teleports to where its pointing.
 				case MOVEMENT.TELEPORT:
+					let teleporterHelper = ControllerManager.instance.controllers[0]
+						.getObjectByName("Teleporter:CTRL_0") as ControllerTeleporter;
+
+					if (
+						wasTouchpadButtonPressed
+						&& !isTouchpadButtonPressed
+					) {						
+						let newPosition = teleporterHelper?.teleportReleased();
+
+						if (newPosition) this._collision_shape?.position.set(
+							newPosition.x,
+							newPosition.y,
+							newPosition.z,
+						)
+					}
+					else if (isTouchpadButtonPressed) {
+						// Updates Teleporter Controller
+						if (
+							ControllerManager.movement_mode === MOVEMENT.TELEPORT 
+							|| ControllerManager.movement_mode === MOVEMENT.DASH
+						) {
+							teleporterHelper?.teleportUpdate(GameScene.instance.scene.children);
+						}
+					}
 					break;
 
 				// Like Teleport, but the player dashes to its destination.

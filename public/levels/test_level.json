@@ -62,7 +62,7 @@
 
 	"world_geometry": [
 		{
-			"meshName": "ground_plane",
+			"meshName": "TELEPORTABLE:ground_plane",
 			"geometry": "gmt_ground",
 			"material": "mtr_grass",
 			"position": {"x": 0, "y": 0, "z": 0},
