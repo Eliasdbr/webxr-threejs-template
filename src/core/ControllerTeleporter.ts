@@ -8,6 +8,9 @@ import GameScene from "./GameScene";
  */
 class ControllerTeleporter extends THREE.Object3D {
 
+	/** Max teleportation cooldown in seconds */
+	static MAX_COOLDOWN = 1.0;
+
 	/** Raycaster object. */
 	private _raycaster: THREE.Raycaster;
 
@@ -20,6 +23,9 @@ class ControllerTeleporter extends THREE.Object3D {
 	/** Latest teleportation point */
 	private _lastPoint: THREE.Vector3 | null;
 
+	/** Teleportation cooldown in seconds */
+	private _cooldown: number;
+
 	/** Raycasters reach in meters, */
 	public range: number;
 
@@ -28,6 +34,8 @@ class ControllerTeleporter extends THREE.Object3D {
 		super();
 
 		this.range = range;
+
+		this._cooldown = 0.0;
 
 		this._lastPoint = new THREE.Vector3();
 
@@ -96,7 +104,9 @@ class ControllerTeleporter extends THREE.Object3D {
 			let isFirstTeleportable = intersections[0]
 				.object.name.includes("TELEPORTABLE");
 
-			if (isFirstTeleportable) {
+			if (isFirstTeleportable && this._cooldown <= 0.0) {
+				this._cooldown = 0.0;
+
 				// @ts-ignore
 				this._renderLine.material.color.setHex(0x00AA44);
 
@@ -117,19 +127,33 @@ class ControllerTeleporter extends THREE.Object3D {
 				// @ts-ignore
 				this._renderLine.material.color.setHex(0xAA0000);
 				
-				this._renderCircle.visible = false;
+				this._renderCircle.visible = true;
+				// @ts-ignore
+				this._renderCircle.material.color.setHex(0xAA0000);
 
-				if (this._lastPoint) this._renderCircle.position.set(
-					this._lastPoint.x,
-					this._lastPoint.y + 0.05,
-					this._lastPoint.z,
-				);
+				if (this._cooldown > 0.0) {
+
+					let circleScale = (ControllerTeleporter.MAX_COOLDOWN - this._cooldown) / ControllerTeleporter.MAX_COOLDOWN;
+					this._renderCircle.scale.set(
+						circleScale,
+						circleScale,
+						1.0,
+					);
+
+					this._renderCircle.position.set(
+						intersections[0].point.x,
+						intersections[0].point.y + 0.05,
+						intersections[0].point.z,
+					);
+
+				}
 			}
 
 		}
 		else {
 			this._renderLine.visible = true;
 			this._renderCircle.visible = false;
+			this._renderCircle.scale.set(1, 1, 1);
 			// @ts-ignore
 			this._renderLine.material.color.setHex(0xAA0000);
 
@@ -139,13 +163,26 @@ class ControllerTeleporter extends THREE.Object3D {
 
 	teleportReleased() {
 
-		this._renderLine.visible = false;
+		if (this._cooldown <= 0.0) {
+			this._cooldown = ControllerTeleporter.MAX_COOLDOWN;
 
-		this._renderCircle.visible = false;
-		
-		return this._lastPoint;
+			this._renderLine.visible = false;
+
+			this._renderCircle.visible = false;
+			
+			return this._lastPoint;
+		}
 	}
 
+	/** Updates constantly */
+	update(deltaTime: number) {
+
+		if (this._cooldown >= 0.0)
+			this._cooldown -= deltaTime;
+		else
+			this._cooldown = 0.0;
+
+	}
 }
 
 export default ControllerTeleporter;

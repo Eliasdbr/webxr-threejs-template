@@ -136,14 +136,24 @@ ControllerManager.movement_mode = MOVEMENT.TELEPORT;
 
 let prevTime = 0;
 
+let prevMillis = 0;
+
+let teleporterHelper = ControllerManager.instance.controllers[0]
+.getObjectByName("Teleporter:CTRL_0") as ControllerTeleporter;
+
 // Main Loop
 GameScene.instance.update = function(time) {
+	/** 
+	 * Delta time.
+	 * 
+	 * Difference between the previous frame and the current.
+	 **/
+	const deltaTime = (time - prevMillis) / 1000;
 
-
+	// Updates UIPointers raycasters, to be able to select UI Objects.
+	// but just update every 0.05 seconds
 	if (time > prevTime + 50) {
 
-		// Updates UIPointers raycasters, to be able to select UI Objects.
-		// but just update every 0.05 seconds
 		let uiPointer0 = ControllerManager
 			.instance
 			.controllers[0]
@@ -162,5 +172,10 @@ GameScene.instance.update = function(time) {
 
 		prevTime = time;
 	}
+
+	// Updates the teleporterHelpers cooldown
+	teleporterHelper.update(deltaTime);
+
+	prevMillis = time;
 
 };
