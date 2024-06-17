@@ -59,6 +59,7 @@ class ControllerTeleporter extends THREE.Object3D {
 		// Line length based on range
 		this._renderLine.scale.set(1, 1, range);
 		this._renderLine.visible = false;
+		this._renderLine.name = "TELEPORT_IGNORE:TeleportLine";
 		this.add(this._renderLine);
 
 		const circleGeometry = new THREE.CircleGeometry(0.25, 16);
@@ -95,9 +96,17 @@ class ControllerTeleporter extends THREE.Object3D {
 
 		let intersections = this._raycaster
 			.intersectObjects(objectsToCheck, true)
-			.filter(int => !int.object.name.includes("TELEPORT_IGNORE"));
+			// exclude meshes that are not teleportable
+			.filter(
+				int => !int.object.name.includes("TELEPORT_IGNORE")
+			);
 		
-			// terminal.log("Intersections:", intersections.length);
+			// console.log(
+			// 	"Intersections:",
+			// 	intersections.map(
+			// 		int => int.object.type + "::"	+ int.object.name
+			// 	)
+			// );
 		
 		if (intersections.length) {
 
@@ -177,7 +186,7 @@ class ControllerTeleporter extends THREE.Object3D {
 	/** Updates constantly */
 	update(deltaTime: number) {
 
-		if (this._cooldown >= 0.0)
+		if (this._cooldown > 0.0)
 			this._cooldown -= deltaTime;
 		else
 			this._cooldown = 0.0;
