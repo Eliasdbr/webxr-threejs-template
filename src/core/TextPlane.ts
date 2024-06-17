@@ -163,9 +163,7 @@ export default class TextPlane extends THREE.Object3D {
 				);
 			});
 
-			g.fillStyle = this.textColor
-				.multiply(new THREE.Color(0x808080))
-				.getStyle();
+			g.fillStyle = this.textColor.getStyle();
 			g.textBaseline = 'bottom';
 			g.textAlign = 'right';
 			g.fillText(
