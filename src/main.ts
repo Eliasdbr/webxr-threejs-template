@@ -132,7 +132,7 @@ function onWindowResize(){
 
 }
 
-ControllerManager.movement_mode = MOVEMENT.TELEPORT;
+ControllerManager.movement_mode = MOVEMENT.DASH;
 
 let prevTime = 0;
 

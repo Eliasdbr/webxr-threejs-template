@@ -5,14 +5,19 @@ import GameScene from "./GameScene";
 import Entity from "./Entity";
 import ControllerManager, { MOVEMENT } from "./ControllerManager";
 import ControllerTeleporter from "./ControllerTeleporter";
+import { compareVec3 } from "../utils/conversions";
 
 class Player extends Entity {
 
 	private MOVEMENT_SPEED = 0.01;
 
+	private DASH_SPEED_MULT = 12.0;
+
 	private _controller: THREE.XRTargetRaySpace | null = null;
 
 	private _prevButtons: boolean[];
+
+	private _dashTowards: THREE.Vector3 | null = null;
 
 	public can_move = true;
 
@@ -65,30 +70,18 @@ class Player extends Entity {
 
 	private moveBasedOnInput(input: Gamepad) {
 		if (this._collision_shape && this._controller) {
+			let teleporterHelper = ControllerManager.instance.controllers[0]
+						.getObjectByName("Teleporter:CTRL_0") as ControllerTeleporter;
 
 			let wasTouchpadButtonPressed = this._prevButtons[2];
 
 			let isTouchpadButtonPressed = input.buttons[2].pressed;
-
-			// // Checks if touchpad button is just pressed
-			// if (
-			// 	!wasTouchpadButtonPressed
-			// 	&& isTouchpadButtonPressed
-			// ) terminal.log("Touchpad Pressed!");
-
-			// // Checks if touchpad button is just released
-			// if (
-			// 	wasTouchpadButtonPressed
-			// 	&& !isTouchpadButtonPressed
-			// ) terminal.log("Touchpad Released!");
 
 			// Movement types
 			switch(ControllerManager.movement_mode) {
 
 				// The player teleports to where its pointing.
 				case MOVEMENT.TELEPORT:
-					let teleporterHelper = ControllerManager.instance.controllers[0]
-						.getObjectByName("Teleporter:CTRL_0") as ControllerTeleporter;
 
 					if (
 						wasTouchpadButtonPressed
@@ -115,6 +108,24 @@ class Player extends Entity {
 
 				// Like Teleport, but the player dashes to its destination.
 				case MOVEMENT.DASH:
+
+					if (
+						wasTouchpadButtonPressed
+						&& !isTouchpadButtonPressed
+					) {						
+						let newPosition = teleporterHelper?.teleportReleased();
+
+						if (newPosition) this._dashTowards = new THREE.Vector3(
+							newPosition.x,
+							newPosition.y,
+							newPosition.z,
+						)
+					}
+					else if (isTouchpadButtonPressed) {
+						// Updates Teleporter Controller
+						teleporterHelper?.teleportUpdate(GameScene.instance.scene.children);
+					}
+
 					break;
 
 				// The player moves depending on controller axis.
@@ -155,6 +166,46 @@ class Player extends Entity {
 			&& this.can_move 
 			&& gamepad
 		) this.moveBasedOnInput(gamepad);
+
+
+		if (this._collision_shape && this._dashTowards) {
+
+			if (
+				!compareVec3(
+					this._dashTowards,
+					this._collision_shape.position,
+					this.MOVEMENT_SPEED * this.DASH_SPEED_MULT
+				)
+			) {
+				// get the normalized vector that points to the dashTowads position from this._collision_shape.position
+				const dashVector = new THREE.Vector3()
+					.subVectors(
+						this._dashTowards,
+						new THREE.Vector3(
+							this._collision_shape.position.x,
+							this._collision_shape.position.y,
+							this._collision_shape.position.z
+						)
+					)
+					.normalize();
+
+				const final_vector = new THREE.Vector3(
+					dashVector.x * this.MOVEMENT_SPEED * this.DASH_SPEED_MULT,
+					0,
+					dashVector.z * this.MOVEMENT_SPEED * this.DASH_SPEED_MULT,
+				)
+				// .applyQuaternion(contr_quat);
+				
+				this._collision_shape.position.x += final_vector.x;
+	
+				this._collision_shape.position.z += final_vector.z;
+			}
+
+			else {
+				this._dashTowards = null;
+			}
+			
+		}
 	}
 }
 
